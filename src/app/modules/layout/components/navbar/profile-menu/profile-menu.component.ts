@@ -1,16 +1,18 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { NgClass } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, effect, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { AngularSvgIconModule } from 'angular-svg-icon';
 import { ThemeService } from '../../../../../core/services/theme.service';
 import { ClickOutsideDirective } from '../../../../../shared/directives/click-outside.directive';
+import { ConnectedUser } from 'src/app/shared/models/user.model';
+import { Oauth2AuthService } from 'src/app/modules/auth/oauth2-auth.service';
 
 @Component({
   selector: 'app-profile-menu',
   templateUrl: './profile-menu.component.html',
   styleUrls: ['./profile-menu.component.css'],
-  imports: [ClickOutsideDirective, NgClass, RouterLink, AngularSvgIconModule],
+  imports: [ClickOutsideDirective, NgClass, AngularSvgIconModule],
   animations: [
     trigger('openClose', [
       state(
@@ -34,23 +36,26 @@ import { ClickOutsideDirective } from '../../../../../shared/directives/click-ou
     ]),
   ],
 })
-export class ProfileMenuComponent implements OnInit {
+export class ProfileMenuComponent {
   public isOpen = false;
+  private _router = inject(Router)
   public profileMenu = [
     {
       title: 'Your Profile',
       icon: './assets/icons/heroicons/outline/user-circle.svg',
-      link: '/profile',
+      clickLink:()=> this.profile(),
+     
     },
     {
-      title: 'Settings',
+      title: 'edit profile',
       icon: './assets/icons/heroicons/outline/cog-6-tooth.svg',
-      link: '/settings',
+      clickLink:()=> this.editProfile(),
     },
     {
       title: 'Log out',
       icon: './assets/icons/heroicons/outline/logout.svg',
-      link: '/auth',
+      link: '',
+      clickLink:()=>this.logout()
     },
   ];
 
@@ -88,10 +93,39 @@ export class ProfileMenuComponent implements OnInit {
   public themeMode = ['light', 'dark'];
   public themeDirection = ['ltr', 'rtl'];
 
-  constructor(public themeService: ThemeService) {}
+  public themeService = inject(ThemeService);
+  oauth2Service = inject(Oauth2AuthService);
+  connectedUser: ConnectedUser | undefined;
+  // offCanvasService = inject(NgbOffcanvas);
 
-  ngOnInit(): void {}
+  constructor() {
+    this.listenToFetchUser();
+  }
 
+  private listenToFetchUser() {
+    effect(() => {
+      const userState = this.oauth2Service.fetchUser();
+      if (userState.status === "OK"
+        && userState.value?.email
+        && userState.value.email !== this.oauth2Service.notConnected) {
+        this.connectedUser = userState.value;
+      }
+    });
+  }
+
+  profile():void{
+     this.oauth2Service.goToProfilePage();
+  }
+  //   settings():void{
+  //    this._router.navigate(['/settings']);
+  // }
+  logout(): void {
+    this.oauth2Service.logout();
+  }
+
+  editProfile(): void {
+    this.oauth2Service.goToProfilePage();
+  }
   public toggleMenu(): void {
     this.isOpen = !this.isOpen;
   }

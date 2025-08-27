@@ -1,4 +1,3 @@
-
 import { AfterViewInit, Directive, ElementRef, EventEmitter, Inject, OnDestroy, Output, DOCUMENT } from '@angular/core';
 import { filter, fromEvent, Subscription } from 'rxjs';
 

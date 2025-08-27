@@ -1,0 +1,19 @@
+<ng-container>
+  <th class="w-[50px] text-center">
+    <input
+      [checked]="isAllSelected()"
+      (change)="toggleAllSelection($event)"
+      class="checkbox checkbox-sm"
+      data-datatable-check="true"
+      type="checkbox" />
+  </th>
+
+  <th class="min-w-[180px]">Titre</th>
+  <th class="min-w-[180px]">Catégorie</th>
+  <th class="min-w-[150px]">Confidentialité</th>
+  <th class="min-w-[150px]">Date Création</th>
+  <th class="min-w-[150px]">Propriétaire</th>
+  <th class="min-w-[120px]">Statut</th>
+  <th class="min-w-[200px]">Lieu de stockage</th>
+  <th class="min-w-[200px]">Fichier</th>
+</ng-container>

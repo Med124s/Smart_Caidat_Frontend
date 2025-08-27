@@ -1,38 +1,60 @@
 <ng-container>
-  <td class="text-center">
+  <!-- <td class="text-center" (click)="toggleSelection($event)">
     <input
-      [(ngModel)]="user.selected"
       class="checkbox checkbox-sm"
       data-datatable-row-check="true"
       type="checkbox"
-      value="28" />
+      value="28"
+      [checked]="user.selected"
+      />
+  </td> -->
+  <td class="text-center" (click)="toggleSelection($event)">
+    <input class="checkbox checkbox-sm" data-datatable-row-check="true" type="checkbox"
+      [checked]="selectionService.isSelected(user.publicId!)" />
   </td>
+
   <td>
     <div class="flex items-center gap-2.5">
-      <img
-        alt="user avatar"
-        class="h-9 w-9 shrink-0 rounded-full"
-        src="https://ui-avatars.com/api/?name={{ user.name }}&background=random" />
+      @if (user.imageUrl) {
+      <img alt="user avatar" class="h-9 w-9 shrink-0 rounded-full" [src]="avatarPreview" />
+      }
+      @else{
+      <img alt="user avatar" class="h-9 w-9 shrink-0 rounded-full"
+        src="https://ui-avatars.com/api/?name={{ user.firstName }}&background=random" />
+      }
+
       <div class="flex flex-col items-start">
-        <a class="text-foreground hover:text-primary text-sm font-semibold" href="#"> {{ user.name }} </a>
+        <a class="text-foreground hover:text-primary text-sm font-semibold" href="#"> {{user.firstName }} </a>
         <a class="text-muted-foreground/70 hover:text-primary text-xs font-medium" href="#">
           {{ user.email }}
         </a>
       </div>
     </div>
   </td>
-  <td>{{ user.username }}</td>
-  <td class="space-x-1">
+  <td>{{user.firstName }}</td>
+  <!-- <td class="space-x-1">
     @for (hobbie of user.hobbies; track $index) {
     <span class="rounded-[30px] bg-yellow-500/10 px-2 py-0.5 text-xs font-medium text-yellow-800">
       {{ hobbie }}
     </span>
     }
-  </td>
+  </td> -->
   <td>
-    {{ user.occupation }}
+    {{user.lastName }}
   </td>
-  <td>{{ user.phone }}</td>
+
+
+  <td class="space-x-1">
+    @for (role of user.authorities; track $index) {
+    <span class="rounded-[30px] bg-yellow-500/10 px-2 py-0.5 text-xs font-medium text-yellow-800">
+      {{ role }}
+    </span>
+    }
+  </td>
+  <td>{{user.publicId}}</td>
+  <!-- <td>{{user.lastSeen}}</td> -->
+<td>{{ formatLastSeen(user.lastSeen)}}</td>
+
   <td class="text-center">
     <button
       class="text-muted-foreground hover:bg-card hover:text-foreground flex h-7 w-7 items-center justify-center rounded-md">

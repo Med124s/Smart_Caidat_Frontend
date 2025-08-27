@@ -1,0 +1,99 @@
+{
+  "archives": [
+    {
+      "id": "2",
+      "title": "Marhaba 2",
+      "description": "heeeyBik",
+      "categoryPublicId": "edc2df",
+      "status": "EN_ATTENTE",
+      "confidentiality": "CONFIDENTIAL",
+      "storageLocation": "LOCAL",
+      "ownerPublicId": "",
+      "ownerType": "NONE",
+      "requestPublicId": "",
+      "creationDate": "2025-08-18T23:33:26"
+    },
+    {
+      "id": "3",
+      "title": "Manga ",
+      "description": "manga yama",
+      "categoryPublicId": "baty1s",
+      "status": "ACTIF",
+      "confidentiality": "PUBLIC",
+      "storageLocation": "MINIO",
+      "ownerPublicId": "",
+      "ownerType": "NONE",
+      "requestPublicId": "",
+      "creationDate": "2025-08-18T23:46:29"
+    }
+  ],
+  "documents": [
+    {
+      "id": "1",
+      "publicId": "pp2",
+      "archiveId": null,
+      "fileTitle": "formulaire",
+      "fileName": "formulaire.pdf",
+      "mimeType": "application/pdf",
+      "fileSize": 200000,
+      "uploadDate": "2025-08-16"
+    },
+    {
+      "id": "3",
+      "fileTitle": "GSI_Ben",
+      "fileName": "GSI_BENYGHIL.docx",
+      "mimeType": "image/jpeg",
+      "size": 139878,
+      "uploadDate": "2025-08-17T18:15:27",
+      "archiveId": null
+    },
+    {
+      "id": "4",
+      "fileTitle": "hgghh",
+      "fileName": "xlicons.exe",
+      "mimeType": "application/x-msdownload",
+      "size": 3686568,
+      "uploadDate": "2025-08-17T21:04:02",
+      "archiveId": 3
+    },
+    {
+      "id": "5",
+      "fileTitle": "fd",
+      "fileName": "xlidfcons.exe",
+      "mimeType": "application/x-msdownload",
+      "size": 3686568,
+      "uploadDate": "2025-08-17T21:04:02",
+      "archiveId": 3
+    },
+    {
+      "id": "2e11",
+      "fileTitle": "chmicha ya omri",
+      "fileName": "Chama.jpg",
+      "mimeType": "image/jpeg",
+      "size": 268256,
+      "uploadDate": "2025-08-19T16:39:45",
+      "_file": {},
+      "archiveId": "2"
+    },
+    {
+      "id": "3044",
+      "fileTitle": "HHHHHHHHHH",
+      "fileName": "Chama.jpg",
+      "mimeType": "image/jpeg",
+      "size": 268256,
+      "uploadDate": "2025-08-19T17:44:11",
+      "_file": {},
+      "archiveId": "3"
+    },
+    {
+      "id": "0d77",
+      "fileTitle": "aza001",
+      "fileName": "Chama.jpg",
+      "mimeType": "image/jpeg",
+      "size": 268256,
+      "uploadDate": "2025-08-20T01:32:38",
+      "_file": {},
+      "archiveId": null
+    }
+  ]
+}

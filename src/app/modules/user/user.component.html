@@ -1,0 +1,253 @@
+@if (visible) {
+<div class="fixed inset-0 flex items-center justify-center bg-foreground  z-50 opacity-95">
+    <div class="bg-card text-white p-6 rounded-lg w-full max-w-2xl">
+        <h2 class="text-xl text-foreground font-semibold mb-4">Ajouter un nouvel utilisateur</h2>
+
+        <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+
+                <div>
+                    <input id="firstName" name="firstName" type="text" formControlName="firstName" placeholder="Prénom"
+                        class="input" />
+                    <div *ngIf="userForm.get('firstName')?.touched && userForm.get('firstName')?.invalid"
+                        class="text-red-500 text-xs mt-1">
+                        *Le prénom est requis.
+                    </div>
+                </div>
+                <div>
+                    <input id="lastName" name="lastName" type="text" formControlName="lastName" placeholder="Nom"
+                        class="input" />
+                    <div *ngIf="userForm.get('lastName')?.touched && userForm.get('lastName')?.invalid"
+                        class="text-red-500 text-xs mt-1">
+                        *Le nom est requis.
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <input id="email" name="email" formControlName="email" placeholder="exemple@domaine.com" type="email"
+                    class="input w-full" />
+                <div *ngIf="userForm.get('email')?.touched && userForm.get('email')?.invalid"
+                    class="text-red-500 text-xs mt-1">
+                    *email est requis.
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+
+                <div class="relative">
+
+                    <div>
+                        <input id="password" name="password" [type]="showPassword ? 'text' : 'password'"
+                            formControlName="password" placeholder="Mot de Passe" class="input" />
+                        <button type="button" (click)="showPassword = !showPassword" class="absolute right-2 top-2">
+                            <svg *ngIf="!showPassword" class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg"
+                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            <svg *ngIf="showPassword" class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg"
+                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.956 9.956 0 012.132-3.362M9.88 9.88a3 3 0 104.24 4.24M3 3l18 18" />
+                            </svg>
+                        </button>
+                        <div *ngIf="userForm.get('password')?.touched && userForm.get('password')?.invalid"
+                            class="text-red-500 text-xs mt-1">
+                            *password est requis.
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="relative">
+
+                    <div>
+                        <input id="confirmPassword" name="confirmPassword" [type]="showConfirmPassword ? 'text' : 'password'"
+                            formControlName="confirmPassword" placeholder="Confirmer le Mot de Passe" class="input" />
+                        <button type="button" (click)="showConfirmPassword = !showConfirmPassword" class="absolute right-2 top-2">
+                            <svg *ngIf="!showConfirmPassword" class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg"
+                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            <svg *ngIf="showConfirmPassword" class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg"
+                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.956 9.956 0 012.132-3.362M9.88 9.88a3 3 0 104.24 4.24M3 3l18 18" />
+                            </svg>
+                        </button>
+                        <div *ngIf="userForm.get('confirmPassword')?.touched && userForm.get('password')?.invalid"
+                            class="text-red-500 text-xs mt-1">
+                            *password est requis.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <select formControlName="authorities" class="input w-full" multiple>
+                <option disabled [selected]=true>Role</option>
+                <option value="ROLE_AGENT_AUTHORITY">Agent d'authorité</option>
+                <option value="ROLE_SECRETARY">Secritaire</option>
+                <option value="ROLE_ADMIN">Administrateur</option>
+            </select>
+
+            <div>
+                <span class="block text-sm text-muted-foreground font-semibold mb-4">Télécharger l'image</span>
+                <div class="flex items-center gap-5">
+                    <img class="size-11 shrink-0 rounded-md" src="https://avatars.githubusercontent.com/u/12519008?v=4"
+                        alt="" />
+                    <label class="text-muted-foreground w-full">
+                        <input formControlName="imageUrl" type="file" (change)="onFileChange($event)"
+                            class="p-2 block w-full text-sm text-background border border-muted rounded-lg cursor-pointer bg-foreground  focus:outline-none"
+                            id="file_input" />
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 mt-4">
+                <button
+                    class="hover:bg-primary-600 bg-green-400 text-primary-foreground flex-none rounded-md px-4 py-2.5 text-xs font-semibold"
+                    type="submit">Save</button>
+                <button
+                    class="hover:bg-primary-600 bg-red-500 text-primary-foreground flex-none rounded-md px-4 py-2.5 text-xs font-semibold"
+                    (click)="cancel()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+}
+
+@if (visibleUpdate) {
+<div class="fixed inset-0 flex items-center justify-center bg-foreground  z-50 opacity-95">
+    <div class="bg-card text-white p-6 rounded-lg w-full max-w-2xl">
+        <h2 class="text-xl text-foreground font-semibold mb-4">Update utilisateur</h2>
+
+        <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+
+                <div>
+                    <input id="firstName" name="firstName" type="text" formControlName="firstName" placeholder="Prénom"
+                        class="input" />
+                    <div *ngIf="userForm.get('firstName')?.touched && userForm.get('firstName')?.invalid"
+                        class="text-red-500 text-xs mt-1">
+                        *Le prénom est requis.
+                    </div>
+                </div>
+                <div>
+                    <input id="lastName" name="lastName" type="text" formControlName="lastName" placeholder="Nom"
+                        class="input" />
+                    <div *ngIf="userForm.get('lastName')?.touched && userForm.get('lastName')?.invalid"
+                        class="text-red-500 text-xs mt-1">
+                        *Le nom est requis.
+                    </div>
+                </div>
+            </div>
+            <div>
+                <input id="email" name="email" type="email" formControlName="email" placeholder="exemple@domaine.com"
+                    class="input w-full" />
+                <div *ngIf="userForm.get('email')?.touched && userForm.get('email')?.invalid"
+                    class="text-red-500 text-xs mt-1">
+                    <div *ngIf="userForm.get('email')?.errors?.['required']">L'email est requis.</div>
+                    <div *ngIf="userForm.get('email')?.errors?.['email']">Format de l'email invalide.</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+
+                <div class="relative">
+                    <div>
+                        <input id="password" name="password" [type]="showPassword ? 'text' : 'password'"
+                            formControlName="password" placeholder="Mot de Passe" class="input" />
+                        <button type="button" (click)="showPassword = !showPassword" class="absolute right-2 top-2">
+                            <svg *ngIf="!showPassword" class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg"
+                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            <svg *ngIf="showPassword" class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg"
+                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.956 9.956 0 012.132-3.362M9.88 9.88a3 3 0 104.24 4.24M3 3l18 18" />
+                            </svg>
+                        </button>
+                        <div *ngIf="userForm.get('password')?.touched && userForm.get('password')?.invalid"
+                            class="text-red-500 text-xs mt-1">
+                            *password est requis.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <div>
+                        <input id="confirmPassword" name="confirmPassword"
+                            [type]="showConfirmPassword ? 'text' : 'password'" formControlName="confirmPassword"
+                            placeholder="Confirmer le Mot de Passe" class="input" />
+                        <button type="button" (click)="showConfirmPassword = !showConfirmPassword"
+                            class="absolute right-2 top-2">
+                            <svg *ngIf="!showConfirmPassword" class="h-5 w-5 text-gray-500"
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            <svg *ngIf="showConfirmPassword" class="h-5 w-5 text-gray-500"
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.956 9.956 0 012.132-3.362M9.88 9.88a3 3 0 104.24 4.24M3 3l18 18" />
+                            </svg>
+                        </button>
+                        <div *ngIf="userForm.get('confirmPassword')?.touched && userForm.get('confirmPassword')?.invalid"
+                            class="text-red-500 text-xs mt-1">
+                            <div *ngIf="userForm.get('confirmPassword')?.errors?.['required']">La confirmation est
+                                requise.</div>
+                            <div *ngIf="userForm.get('confirmPassword')?.errors?.['mismatch']">Les mots de passe ne
+                                correspondent pas.</div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <select formControlName="authorities" class="input w-full" multiple>
+                <option disabled [selected]=true>Role</option>
+                <option value="ROLE_AGENT_AUTHORITY">Agent d'authorité</option>
+                <option value="ROLE_SECRETARY">Secritaire</option>
+                <option value="ROLE_ADMIN">Administrateur</option>
+            </select>
+
+            <div>
+                <span class="block text-sm text-muted-foreground font-semibold mb-4">Télécharger l'image</span>
+                <div class="flex items-center gap-5">
+              <img alt="user avatar" class="h-9 w-9 shrink-0 rounded-full" [src]="avatarPreview" />
+                    <label class="text-muted-foreground w-full">
+                        <input type="file" (change)="onFileChange($event)"
+                            class="p-2 block w-full text-sm text-background border border-muted rounded-lg cursor-pointer bg-foreground  focus:outline-none"
+                            id="file_input" />
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 mt-4">
+                <button
+                    class="hover:bg-primary-600 bg-green-400 text-primary-foreground flex-none rounded-md px-4 py-2.5 text-xs font-semibold"
+                    type="submit">Save</button>
+                <button
+                    class="hover:bg-primary-600 bg-red-500 text-primary-foreground flex-none rounded-md px-4 py-2.5 text-xs font-semibold"
+                    (click)="cancel()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+}

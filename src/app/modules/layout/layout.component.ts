@@ -3,6 +3,7 @@ import { Event, NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { FooterComponent } from './components/footer/footer.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
+import { BottomNavbarComponent } from './components/bottom-navbar/bottom-navbar.component';
 
 @Component({
   selector: 'app-layout',

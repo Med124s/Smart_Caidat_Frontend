@@ -1,0 +1,124 @@
+<ng-container>
+  <!-- ✅ Checkbox sélection -->
+  <td class="text-center">
+    <input
+      type="checkbox"
+      [checked]="isSelected$ | async"
+      (change)="toggleSelection($event)"
+      class="checkbox checkbox-sm" />
+  </td>
+
+  <!-- 🏷️ Titre -->
+  <td>{{ archive.title }}</td>
+
+  <!-- 📂 Catégorie -->
+<td>{{ getCategoryName(archive.categoryPublicId)}}</td>
+
+  <!-- 📌 Type -->
+  <!-- <td>{{ archive. }}</td> -->
+
+  <!-- 🔒 Confidentialité -->
+  <!-- <td>{{ archive.confidentiality }}</td> -->
+
+  <!-- Colonne Confidentialité -->
+  <td>
+    <span
+      [ngClass]="{
+        'bg-green-100 text-green-800': archive.confidentiality === 'PUBLIC',
+        'bg-yellow-100 text-yellow-800': archive.confidentiality === 'INTERNAL',
+        'bg-red-100 text-red-800': archive.confidentiality === 'CONFIDENTIAL',
+      }"
+      class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium">
+      {{ archive.confidentiality }}
+    </span>
+  </td>
+
+  <!-- 📅 Date de création -->
+  <td>
+    {{ archive.creationDate ? (archive.creationDate | date: 'dd/MM/yyyy') : '' }}
+  </td>
+
+  <!-- 👤 Auteur -->
+  <!-- <td>{{ archive.ownerType }} - {{ archive.ownerPublicId?.substr(1, 5) }}</td> -->
+
+  <!-- Colonne Propriétaire -->
+  <td>
+    <span *ngIf="archive.ownerType === 'CITIZEN'"> {{ archive.ownerFirstName }} {{ archive.ownerLastName }} </span>
+    <!-- <span *ngIf="archive.ownerType === 'USER'"> {{ archive.owner?.firstName }} {{ archive.owner?.lastName }} </span> -->
+    <span *ngIf="archive.ownerType === 'NONE'">Aucun</span>
+  </td>
+
+  <!-- 📊 Statut -->
+  <!-- <td>{{ archive.status }}</td> -->
+  <!-- Colonne Status -->
+  <td>
+    <span
+      [ngClass]="{
+        'bg-green-100 text-green-800': archive.status === 'ARCHIVED',
+        'bg-blue-100 text-blue-800': archive.status === 'ACTIVE',
+        'bg-yellow-100 text-yellow-800': archive.status === 'ON_HOLD',
+        'bg-red-100 text-red-800': archive.status === 'DELETED',
+      }"
+      class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium">
+      {{ archive.status }}
+    </span>
+  </td>
+
+  <!-- 🗄️ Lieu -->
+  <!-- <td>{{ archive.storageLocation }}</td> -->
+  <!-- Colonne Lieu de stockage -->
+  <td>
+    <span
+      [ngClass]="{
+        'bg-blue-100 text-blue-800': archive.storageLocation === 'LOCAL',
+        'bg-purple-100 text-purple-800': archive.storageLocation === 'MINIO',
+        'bg-gray-100 text-gray-800': archive.storageLocation === 'EXTERNE'
+      }"
+      class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium">
+      {{ archive.storageLocation }}
+    </span>
+  </td>
+
+  <!-- 📎 document -->
+  <!-- <td>
+    <button (click)="openDocuments()" class="text-xs text-blue-500 hover:underline">
+      Voir documents ({{ archive.documents?.length || 0 }})
+    </button>
+  </td> -->
+
+  <!-- Colonne Documents -->
+  <td class="relative">
+    <!-- Badge avec nombre de documents -->
+    <span
+      class="absolute top-1 right-0 left-9 inline-flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-xs text-white">
+      {{ archive.documents?.length || 0 }}
+    </span>
+
+    <!-- Icône œil -->
+    <button type="button" class="rounded p-1 hover:bg-gray-200" (click)="openDocuments(archive, $event)">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-5 w-5 text-blue-600"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+      </svg>
+    </button>
+  </td>
+
+  <!-- ⚡ Actions -->
+  <!-- <td class="space-x-2 text-center">
+    <button class="text-xs text-blue-500 hover:underline" (click)="editArchive(archive)">Modifier</button>
+    <button class="text-xs text-red-500 hover:underline" (click)="deleteArchive(archive.publicId)">Supprimer</button>
+  </td> -->
+
+
+  <app-request-document-modal [visible]="showDocumentsModal" [documents]="archive.documents || []" (close)="closeDocuments()">
+  </app-request-document-modal>
+</ng-container>

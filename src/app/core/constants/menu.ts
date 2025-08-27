@@ -10,7 +10,7 @@ export class Menu {
           icon: 'assets/icons/heroicons/outline/chart-pie.svg',
           label: 'Dashboard',
           route: '/dashboard',
-          children: [{ label: 'Nfts', route: '/dashboard/nfts' }],
+          children: [{ label: 'State', route: '/dashboard/nfts' }],
         },
         {
           icon: 'assets/icons/heroicons/outline/lock-closed.svg',
@@ -35,30 +35,54 @@ export class Menu {
         },
         {
           icon: 'assets/icons/heroicons/outline/cube.svg',
-          label: 'Components',
-          route: '/components',
-          children: [{ label: 'Table', route: '/components/table' }],
+          label: 'Gestion des documents',
+          route: '/document_management',
+          children: [
+            { label: 'Archives administratives', route: '/document_management/archives' },
+            { label: 'Demandes de documents', route: '/document_management/requests' },
+          ],
         },
       ],
     },
     {
-      group: 'Collaboration',
+      group: "Gestion des utilisateurs",
       separator: true,
       items: [
-        {
-          icon: 'assets/icons/heroicons/outline/download.svg',
-          label: 'Download',
-          route: '/download',
-        },
-        {
-          icon: 'assets/icons/heroicons/outline/gift.svg',
-          label: 'Gift Card',
-          route: '/gift',
-        },
+        // {
+        //   icon: 'assets/icons/heroicons/outline/download.svg',
+        //   label: 'Download',
+        //   route: '/download',
+        // },
+        // {
+        //   icon: 'assets/icons/heroicons/outline/gift.svg',
+        //   label: 'Gift Card',
+        //   route: '/gift',
+        // },
         {
           icon: 'assets/icons/heroicons/outline/users.svg',
-          label: 'Users',
+          label: 'Utilisateurs',
           route: '/users',
+        },
+      ],
+    },
+    {
+      group: "Gestion des citoyens",
+      separator: true,
+      items: [
+        // {
+        //   icon: 'assets/icons/heroicons/outline/download.svg',
+        //   label: 'Download',
+        //   route: '/download',
+        // },
+        // {
+        //   icon: 'assets/icons/heroicons/outline/gift.svg',
+        //   label: 'Gift Card',
+        //   route: '/gift',
+        // },
+        {
+          icon: 'assets/icons/heroicons/outline/users.svg',
+          label: 'Citoyens',
+          route: '/citoyens',
         },
       ],
     },

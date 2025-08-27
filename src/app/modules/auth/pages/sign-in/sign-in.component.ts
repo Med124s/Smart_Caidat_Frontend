@@ -1,9 +1,10 @@
 import { NgClass, NgIf } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import {  FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import {  Router, RouterLink } from '@angular/router';
 import { AngularSvgIconModule } from 'angular-svg-icon';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
+import { Oauth2AuthService } from '../../oauth2-auth.service';
 
 @Component({
   selector: 'app-sign-in',
@@ -11,12 +12,14 @@ import { ButtonComponent } from '../../../../shared/components/button/button.com
   styleUrls: ['./sign-in.component.css'],
   imports: [FormsModule, ReactiveFormsModule, RouterLink, AngularSvgIconModule, NgIf, ButtonComponent, NgClass],
 })
-export class SignInComponent implements OnInit {
+export class SignInComponent  {
   form!: FormGroup;
   submitted = false;
   passwordTextType!: boolean;
-
-  constructor(private readonly _formBuilder: FormBuilder, private readonly _router: Router) {}
+  
+  private readonly _formBuilder = inject(FormBuilder);
+  private readonly _router = inject(Router);
+  private _oauth2AuthService = inject(Oauth2AuthService);
 
   onClick() {
     console.log('Button clicked');
@@ -40,11 +43,11 @@ export class SignInComponent implements OnInit {
   onSubmit() {
     this.submitted = true;
     const { email, password } = this.form.value;
-
     if (this.form.invalid) {
       return;
     }
 
-    this._router.navigate(['/']);
+    // this._router.navigate(['/']);
+    this._oauth2AuthService.login();
   }
 }

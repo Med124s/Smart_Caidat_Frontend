@@ -6,9 +6,9 @@ import { TableComponent } from './pages/table/table.component';
 const routes: Routes = [
   {
     path: '',
-    component: UikitComponent,
+    component: TableComponent,
     children: [
-      { path: '', redirectTo: 'components', pathMatch: 'full' },
+      { path: '', redirectTo: 'users', pathMatch: 'full' },
       { path: 'table', component: TableComponent },
       { path: '**', redirectTo: 'errors/404' },
     ],

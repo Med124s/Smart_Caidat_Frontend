@@ -1,0 +1,161 @@
+@if (visible || visibleUpdate) {
+<div class="fixed inset-0 flex items-center justify-center bg-foreground z-50 opacity-95">
+  <div class="bg-card text-white p-6 rounded-lg w-full max-w-2xl">
+    <h2 class="text-xl text-foreground font-semibold mb-4">
+      {{ visibleUpdate ? 'A propos du citoyen' : 'Ajouter un nouveau citoyen' }}
+    </h2>
+
+    <form [formGroup]="citizenForm" (ngSubmit)="onSubmit()" class="space-y-4">
+
+      <!-- Prénom / Nom -->
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label for="firstName" class="block text-xs text-muted-foreground mb-1">Prénom</label>
+          <input id="firstName" placeholder="firstName" type="text" formControlName="firstName" class="input" />
+          <div *ngIf="citizenForm.get('firstName')?.touched && citizenForm.get('firstName')?.invalid"
+               class="text-red-500 text-xs mt-1">
+            *Le prénom est requis.
+          </div>
+        </div>
+
+        <div>
+          <label for="lastName" class="block text-xs text-muted-foreground mb-1">Nom</label>
+          <input id="lastName" placeholder="lastName"  type="text" formControlName="lastName" class="input" />
+          <div *ngIf="citizenForm.get('lastName')?.touched && citizenForm.get('lastName')?.invalid"
+               class="text-red-500 text-xs mt-1">
+            *Le nom est requis.
+          </div>
+        </div>
+        
+      </div>
+
+      <!-- Email -->
+      <div>
+        <label for="email" class="block text-xs text-muted-foreground mb-1">Email</label>
+        <input id="email" placeholder="email" type="email" formControlName="email" class="input w-full" />
+        <div *ngIf="citizenForm.get('email')?.touched && citizenForm.get('email')?.invalid"
+             class="text-red-500 text-xs mt-1">
+          <div *ngIf="citizenForm.get('email')?.errors?.['required']">*Email est requis.</div>
+          <div *ngIf="citizenForm.get('email')?.errors?.['email']">*Format d'email invalide.</div>
+        </div>
+      </div>
+
+      <!-- CIN / IDCS -->
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label for="cin" class="block text-xs text-muted-foreground mb-1">CIN</label>
+          <input id="cin" placeholder="cin" type="text" formControlName="cin" class="input" />
+          <div *ngIf="citizenForm.get('cin')?.touched && citizenForm.get('cin')?.invalid"
+               class="text-red-500 text-xs mt-1">
+            *CIN est requis.
+          </div>
+        </div>
+
+        <div>
+          <label for="idcs" class="block text-xs text-muted-foreground mb-1">IDCS (10 chiffres)</label>
+          <input id="idcs" placeholder="idcs" type="text" formControlName="idcs" class="input" maxlength="10" />
+          <div *ngIf="citizenForm.get('idcs')?.touched && citizenForm.get('idcs')?.invalid"
+               class="text-red-500 text-xs mt-1">
+            <div *ngIf="citizenForm.get('idcs')?.errors?.['pattern']">*IDCS doit contenir exactement 10 chiffres numériques.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Téléphone -->
+      <div>
+        <label for="phone" class="block text-xs text-muted-foreground mb-1">Téléphone</label>
+        <input id="phone" type="text" placeholder="telephone" formControlName="phone" class="input" />
+        <div *ngIf="citizenForm.get('phone')?.touched && citizenForm.get('phone')?.invalid"
+             class="text-red-500 text-xs mt-1">
+          *Téléphone est requis.
+        </div>
+      </div>
+
+      <!-- Adresse -->
+      <div>
+        <label for="address" class="block text-xs text-muted-foreground mb-1">Adresse</label>
+        <input id="address" type="text" placeholder="addresse" formControlName="address" class="input" />
+        <div *ngIf="citizenForm.get('address')?.touched && citizenForm.get('address')?.invalid"
+             class="text-red-500 text-xs mt-1">
+          *Adresse est requise.
+        </div>
+      </div>
+
+      <!-- Statut marital / Date naissance -->
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label for="maritalStatus" class="block text-xs text-muted-foreground mb-1">Statut marital</label>
+          <select id="maritalStatus" placeholder="État matrimonial" formControlName="maritalStatus" class="input w-full">
+            <option value="">Sélectionner le statut marital</option>
+            <option value="SINGLE">Célibataire</option>
+            <option value="MARRIED">Marié</option>
+            <option value="DIVORCED">Divorcé</option>
+            <option value="WIDOWED">Veuf/Veuve</option>
+          </select>
+          <div *ngIf="citizenForm.get('maritalStatus')?.touched && citizenForm.get('maritalStatus')?.invalid"
+               class="text-red-500 text-xs mt-1">
+            *Statut marital requis.
+          </div>
+        </div>
+
+        <div>
+          <label for="dateBirth" class="block text-xs text-muted-foreground mb-1">Date de naissance</label>
+          <input id="dateBirth" placeholder="Date de naissnace" type="date" formControlName="dateBirth" class="input w-full" />
+          <div *ngIf="citizenForm.get('dateBirth')?.touched && citizenForm.get('dateBirth')?.invalid"
+               class="text-red-500 text-xs mt-1">
+            *Date de naissance requise.
+          </div>
+        </div>
+      </div>
+
+      <!-- Genre -->
+      <div>
+        <label for="gender" class="block text-xs text-muted-foreground mb-1">Genre</label>
+        <select id="gender" formControlName="gender" class="input w-full">
+          <option value="">Sélectionner le genre</option>
+          <option value="MALE">Homme</option>
+          <option value="FEMALE">Femme</option>
+        </select>
+        <div *ngIf="citizenForm.get('gender')?.touched && citizenForm.get('gender')?.invalid"
+             class="text-red-500 text-xs mt-1">
+          *Genre requis.
+        </div>
+      </div>
+
+      <!-- Image -->
+      <div>
+        <label for="imageUpload" class="block text-xs text-muted-foreground font-semibold mb-2">Télécharger l'image</label>
+        <div class="flex items-center gap-5">
+          <img class="h-10 w-10 shrink-0 rounded-md cursor-pointer"
+               [src]="avatarPreview || 'https://ui-avatars.com/api/?name=' + citizenForm.get('firstName')?.value"
+               alt="avatar" (click)="openImagePreview()" />
+          <input id="imageUpload" type="file" (change)="onFileChange($event)"
+                 class="p-2 block w-full text-sm text-background border border-muted rounded-lg cursor-pointer bg-foreground focus:outline-none" />
+        </div>
+      </div>
+
+      <!-- Full Image Modal -->
+      <div *ngIf="showFullImage" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80">
+        <div class="relative">
+          <button (click)="closeImagePreview()" class="absolute top-2 right-2 text-muted-foreground text-2xl font-bold cursor-pointer">&times;</button>
+          <img [src]="avatarPreview || 'https://ui-avatars.com/api/?name=' + citizenForm.get('firstName')?.value"
+               alt="Full Image" class="max-w-full max-h-[90vh] rounded-lg shadow-lg" />
+        </div>
+      </div>
+
+      <!-- Boutons -->
+      <div class="flex justify-end gap-2 mt-4">
+        <button type="submit"
+                class="hover:bg-primary-600 bg-green-400 text-primary-foreground rounded-md px-4 py-2.5 text-xs font-semibold">
+          {{ visibleUpdate ? 'Mettre à jour' : 'Enregistrer' }}
+        </button>
+        <button type="button" (click)="cancel()"
+                class="hover:bg-primary-600 bg-red-500 text-primary-foreground rounded-md px-4 py-2.5 text-xs font-semibold">
+          Annuler
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+}

@@ -1,11 +1,51 @@
-import { enableProdMode, importProvidersFrom } from '@angular/core';
-import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
-
+import { APP_INITIALIZER, enableProdMode, importProvidersFrom } from '@angular/core';
 import { environment } from './environments/environment';
 import { AppComponent } from './app/app.component';
 import { AppRoutingModule } from './app/app-routing.module';
 import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
+import { HttpClientModule, provideHttpClient, withInterceptors } from '@angular/common/http';
+import { authInterceptor } from './app/modules/auth/http-auth.interceptor';
+import { authExpiredInterceptor } from './app/modules/auth/auth-expired.interceptor';
+import { Oauth2AuthService } from './app/modules/auth/oauth2-auth.service';
+
+// // 🔐 Création instance Keycloak
+// const keycloak = new Keycloak({
+//   url: environment.keycloak.url,
+//   realm: environment.keycloak.realm,
+//   clientId: environment.keycloak.clientId,
+// });
+
+// // 🛑 Initialisation avant le lancement de l'app
+// keycloak
+//   .init({
+//     onLoad: 'check-sso',
+//     silentCheckSsoRedirectUri: window.location.origin + '/assets/silentCheckSsoRedirectUri.html',
+//     pkceMethod: 'S256',
+//     redirectUri: 'http://localhost:4200/',
+//     flow: 'standard',
+//   })
+//   .then((authenticated) => {
+//     if (authenticated) {
+//       console.log('🔐 Authenticated with Keycloak');
+
+//       bootstrapApplication(AppComponent, {
+//         providers: [
+//           importProvidersFrom(BrowserModule, AppRoutingModule, HttpClientModule),
+//           provideAnimations(),
+//           provideHttpClient(withInterceptors([authInterceptor, authExpiredInterceptor])),
+//           { provide: 'KEYCLOAK', useValue: keycloak },
+//         ],
+//       });
+//     } else {
+//       console.warn('❌ Not authenticated');
+//       keycloak.login(); // Redirige vers la page de login si non connecté
+//     }
+//   })
+//   .catch((err) => {
+//     console.error('Keycloak init failed', err);
+//   });
+
 
 if (environment.production) {
   enableProdMode();
@@ -15,8 +55,21 @@ if (environment.production) {
   }
 }
 
+export function initializeAppFactory(authService: Oauth2AuthService): () => Promise<any> {
+  return () => authService.initializeApp();
+}
+
 bootstrapApplication(AppComponent, {
-  providers: [importProvidersFrom(BrowserModule, AppRoutingModule), provideAnimations()],
+  providers: [
+    Oauth2AuthService,
+    importProvidersFrom(BrowserModule, AppRoutingModule, HttpClientModule), provideAnimations(),
+    provideHttpClient(withInterceptors([authInterceptor, authExpiredInterceptor])),
+   {
+      provide: APP_INITIALIZER,
+      useFactory: initializeAppFactory,
+      deps: [Oauth2AuthService],
+      multi: true
+    }],
 }).catch((err) => console.error(err));
 
 function selfXSSWarning() {

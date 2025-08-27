@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { AngularSvgIconModule } from 'angular-svg-icon';
 
 @Component({
@@ -8,10 +8,11 @@ import { AngularSvgIconModule } from 'angular-svg-icon';
   styleUrl: './table-header.component.css',
 })
 export class TableHeaderComponent {
+  @Input() userIds: string[] = [];
   @Output() onCheck = new EventEmitter<boolean>();
 
   public toggle(event: Event) {
-    const value = (event.target as HTMLInputElement).checked;
-    this.onCheck.emit(value);
+    const checked = (event.target as HTMLInputElement).checked;
+    this.onCheck.emit(checked); // émet au parent : true/false
   }
 }

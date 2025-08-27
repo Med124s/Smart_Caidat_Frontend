@@ -10,7 +10,7 @@ export class ThemeService {
 
   constructor() {
     this.loadTheme();
-    effect(() => {
+    effect(() => { // first event will work cause of signal change or just full
       this.setConfig();
     });
   }
