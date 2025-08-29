@@ -1,5 +1,5 @@
 import { ArchiveService } from './../table/services/archive-docs.service';
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, signal, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { AbstractControl, FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AsyncPipe, NgFor, NgIf } from '@angular/common';
 import { Observable, of } from 'rxjs';
@@ -13,8 +13,6 @@ import { RegisterUser } from 'src/app/shared/models/user.model';
 import { Citizen } from 'src/app/modules/citoyen/model/citoyen.model';
 import dayjs from 'dayjs';
 import { ToastService } from 'src/app/shared/toast/toast.service';
-import { RequestSearchService } from '../../../request/pages/table/services/request-docs.service';
-import { RequestDocument } from '../../../request/model/request.model';
 // import { SearchQuery } from '../../model/archive-search.model';
 // import { RequestSearchService } from '../../../request_document/pages/table/services/request.service';
 
@@ -37,10 +35,10 @@ export class ArchiveDocumentComponent implements OnInit, OnChanges {
   ownerType: 'CITIZEN' | 'USER' | 'NONE' = 'NONE';
   selectedCitoyenId = '';
   selectedUser = '';
-  demandesValidees$!: Observable<RequestDocument[]>;
+  // demandesValidees$!: Observable<RequestDocument[]>;
   users$: Observable<RegisterUser[]> = of([]);
   citizens$: Observable<Citizen[]> = of([]);
-  demandes = signal<RequestDocument[]>([]);
+  // demandes = signal<RequestDocument[]>([]);
 
   archiveTypes = Object.values(ArchiveType);
   archiveStatuts = Object.values(ArchiveStatut);
@@ -77,18 +75,18 @@ export class ArchiveDocumentComponent implements OnInit, OnChanges {
     this.selectedCitoyenId = citoyenId;
     if (!citoyenId) return;
 
-    const query: any = { page: { page: 0, size: 10, sort: ['dateCreation,DESC'] }, query: '' };
-    this.requestService.triggerFetchRequestsByCitizen(citoyenId, query);
+    // const query: any = { page: { page: 0, size: 10, sort: ['dateCreation,DESC'] }, query: '' };
+    // this.requestService.triggerFetchRequestsByCitizen(citoyenId, query);
 
-    this.demandesValidees$ = this.requestService.searchResultByCitizen.pipe(
-      map((state) => state.value?.data.filter((d: any) => d.status?.value === 'APPROVED') ?? []),
-    );
+    // this.demandesValidees$ = this.requestService.searchResultByCitizen.pipe(
+    //   map((state) => state.value?.data.filter((d: any) => d.status?.value === 'APPROVED') ?? []),
+    // );
   }
 
   constructor(
     private fb: FormBuilder,
     private citizenService: CitizenSearchService,
-    private requestService: RequestSearchService,
+    // private requestService: RequestSearchService,
     private userService: UserSearchService,
     private archiveService: ArchiveService,
     private toastService: ToastService,
@@ -241,7 +239,7 @@ export class ArchiveDocumentComponent implements OnInit, OnChanges {
     this.archiveForm.patchValue({ ownerType: type, ownerPublicId: '' });
     this.selectedCitoyenId = '';
     this.selectedUser = '';
-    this.demandes.set([]);
+    // this.demandes.set([]);
     if (type === 'USER') this.loadUsers();
     if (type === 'CITIZEN') this.loadCitizens();
   }

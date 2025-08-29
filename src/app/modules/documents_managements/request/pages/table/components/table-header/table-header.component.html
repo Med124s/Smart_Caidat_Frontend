@@ -8,12 +8,16 @@
       type="checkbox" />
   </th>
 
-  <th class="min-w-[180px]">Titre</th>
-  <th class="min-w-[180px]">Catégorie</th>
-  <th class="min-w-[150px]">Confidentialité</th>
-  <th class="min-w-[150px]">Date Création</th>
-  <th class="min-w-[150px]">Propriétaire</th>
-  <th class="min-w-[120px]">Statut</th>
-  <th class="min-w-[200px]">Lieu de stockage</th>
-  <th class="min-w-[200px]">Fichier</th>
+  <th class="min-w-[180px]">Type</th>
+  <th class="min-w-[180px]">Citoyen</th>
+  <th class="min-w-[150px]">Motif</th>
+  <th class="min-w-[150px]">Description</th>
+  <th class="min-w-[150px]">Crier par</th>
+  <th class="min-w-[150px]">Status</th>
+  @if (canChangeStatus) {
+  <th class="min-w-[150px]">Action</th>
+  }
+  <th class="min-w-[120px]">Date creation</th>
+  <th class="min-w-[120px]">Date validation</th>
+  <th class="min-w-[200px]">Document</th>
 </ng-container>

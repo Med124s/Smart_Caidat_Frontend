@@ -1,296 +1,85 @@
 <div class="bg-foreground fixed inset-0 z-50 flex items-center justify-center opacity-95">
-  <div
-    class="scrollbar-thumb--sm scrollbar-track-rounded scrollbar-thin scrollbar-track-transparent scrollbar-thumb-card mx-auto h-full max-h-[95vh] w-full max-w-4xl space-y-8 overflow-y-auto rounded-lg bg-white p-8 shadow-lg">
-    <h3 class="text-foreground mb-4 text-xl font-semibold">
-      📁 {{ mode === 'create' ? 'Ajouter une archive' : 'Modifier une archive' }}
+  <div class="mx-auto h-full max-h-[95vh] w-full max-w-3xl overflow-y-auto rounded-lg bg-white p-8 shadow-lg">
+    <h3 class="mb-4 text-xl font-semibold text-gray-700">
+      📑 {{ mode === 'create' ? 'Nouvelle Demande' : 'Modifier Demande' }}
     </h3>
 
-    <form [formGroup]="archiveForm" (ngSubmit)="onSubmit()" class="space-y-8">
-      <!-- Informations Générales -->
-      <div class="space-y-4 rounded-lg border p-6">
-        <h3 class="text-foreground mb-4 border-b pb-2 font-semibold">Informations générales</h3>
-
-        <!-- Title -->
-        <div>
-          <label for="title" class="text-muted-foreground mb-1 block text-xs">
-            Titre <span class="text-red-500">*</span>
-          </label>
-          <input id="title" type="text" formControlName="title" class="input" placeholder="Titre du document" />
-          <div
-            *ngIf="archiveForm.get('title')?.touched && archiveForm.get('title')?.invalid"
-            class="mt-1 text-xs text-red-500">
-            *Le titre est requis.
-          </div>
-        </div>
-
-        <!-- Description -->
-        <div>
-          <label for="description" class="text-muted-foreground mb-1 block text-xs">Description</label>
-          <textarea
-            id="description"
-            formControlName="description"
-            rows="3"
-            class="input"
-            placeholder="Description du document"></textarea>
-        </div>
-
-        <!-- Catégorie -->
-        <div>
-          <label for="categorie" class="text-muted-foreground mb-1 block text-xs">Catégorie</label>
-          <select id="categorie" formControlName="categoryPublicId" class="input w-full">
-            <option value="">-- Sélectionner --</option>
-            <option *ngFor="let cat of categories" [value]="cat.publicId">{{ cat.categoryName }}</option>
-          </select>
-          <div
-            class="text-sm text-red-500"
-            *ngIf="
-              archiveForm.get('categoryPublicId')?.touched && archiveForm.get('categoryPublicId')?.hasError('required')
-            ">
-            La catégorie est obligatoire.
-          </div>
+    <form [formGroup]="requestForm" (ngSubmit)="onSubmit()" class="space-y-6">
+      <!-- Type -->
+      <div>
+        <label for="type" class="text-muted-foreground mb-1 block text-xs">Type de demande *</label>
+        <select id="type" formControlName="type" class="input">
+          <option value="">-- Sélectionner --</option>
+          <option [value]="RequestType.CERTIFICAT_VIE">Certificat de vie</option>
+          <option [value]="RequestType.CERTIFICAT_RESIDENCE">Certificat de résidence</option>
+          <option [value]="RequestType.CERTIFICAT_MARITAL">Certificat marital</option>
+          <option value="AUTRE">Autre</option>
+        </select>
+        <div *ngIf="requestForm.get('type')?.touched && requestForm.get('type')?.invalid" class="text-xs text-red-500">
+          Le type est obligatoire.
         </div>
       </div>
 
-      <!-- Propriétaire -->
-      <div class="space-y-4 rounded-lg border p-6">
-        <h3 class="text-foreground border-b pb-2 font-semibold">Propriétaire</h3>
-
-        <!-- Type de propriétaire -->
-        <div class="flex flex-wrap gap-4">
-          <label class="text-muted-foreground inline-flex items-center text-xs">
-            <input
-              type="radio"
-              name="proprietaire"
-              (change)="onOwnerTypeChange('CITIZEN')"
-              [checked]="ownerType === 'CITIZEN'" />
-            <span class="ml-2">Citoyen</span>
-          </label>
-
-          <!-- <label class="text-muted-foreground inline-flex items-center text-xs">
-            <input
-              type="radio"
-              name="proprietaire"
-              (change)="onOwnerTypeChange('USER')"
-              [checked]="ownerType === 'USER'" />
-            <span class="ml-2">Utilisateur</span>
-          </label> -->
-
-          <label class="text-muted-foreground inline-flex items-center text-xs">
-            <input
-              type="radio"
-              name="proprietaire"
-              (change)="onOwnerTypeChange('NONE')"
-              [checked]="ownerType === 'NONE'" />
-            <span class="ml-2">Aucun</span>
-          </label>
-        </div>
-
-        <!-- Sélecteur citoyen -->
-        <div *ngIf="ownerType === 'CITIZEN'">
-          <ng-container *ngIf="citizens$ | async as citizens">
-            <div *ngIf="citizens.length > 0">
-              <label for="citoyen" class="text-muted-foreground mb-1 block text-xs">Sélectionner un citoyen</label>
-              <select
-                id="citoyen"
-                formControlName="ownerPublicId"
-                class="input w-full"
-                (change)="onCitoyenSelected($any($event.target).value)">
-                <option value="">-- Sélectionner --</option>
-                <option *ngFor="let c of citizens" [value]="c.publicId">{{ c.firstName }} {{ c.lastName }}</option>
-              </select>
-            </div>
-            <p *ngIf="citizens.length === 0" class="text-red-600">Aucun citoyen disponible.</p>
-          </ng-container>
-        </div>
-
-        <!-- Sélecteur utilisateur -->
-        <!-- <div *ngIf="ownerType === 'USER'">
-          <ng-container *ngIf="users$ | async as users">
-            <div *ngIf="users.length > 0">
-              <label for="user" class="text-muted-foreground mb-1 block text-xs">Utilisateur</label>
-              <select id="user" formControlName="ownerPublicId" class="w-full rounded border px-3 py-2">
-                <option value="">-- Sélectionner un utilisateur --</option>
-                <option *ngFor="let u of users" [value]="u.publicId">{{ u.firstName }} {{ u.lastName }}</option>
-              </select>
-            </div>
-            <p *ngIf="users.length === 0" class="text-red-600">Aucun utilisateur disponible.</p>
-          </ng-container>
-        </div> -->
-
-        <!-- Demandes validées -->
-        <!-- <div *ngIf="ownerType === 'CITIZEN' && selectedCitoyenId">
-          <ng-container *ngIf="demandesValidees$ | async as demandes">
-            <div *ngIf="demandes.length > 0">
-              <label for="demande" class="mb-1 block font-medium">Demandes validées</label>
-              <select id="demande" formControlName="requestPublicId" class="w-full rounded border px-3 py-2">
-                <option value="">-- Sélectionner une demande --</option>
-                <option *ngFor="let d of demandes" [value]="d.publicId">
-                  {{ d.type }} - {{ d.creationDate | date: 'dd/MM/yyyy' }}
-                </option>
-              </select>
-            </div>
-            <p *ngIf="demandes.length === 0" class="text-red-600">Aucune demande validée trouvée pour ce citoyen.</p>
-          </ng-container>
-        </div> -->
-
-
+      <!-- Champ "Autre" -->
+      <div *ngIf="requestForm.get('type')?.value === 'AUTRE'" class="mt-2">
+        <label for="otherType" class="text-muted-foreground mb-1 block text-xs">Préciser le type *</label>
+        <input
+          id="otherType"
+          type="text"
+          formControlName="otherType"
+          class="input"
+          placeholder="Saisir le type de demande" />
       </div>
 
-      <!-- Détails & fichiers -->
-      <div class="space-y-4 rounded-lg border p-6">
-        <h3 class="text-foreground border-b pb-2 font-semibold">Détails et fichier</h3>
+      <!-- Description -->
+      <div>
+        <label for="description" class="text-muted-foreground mb-1 block text-xs">Description</label>
+        <textarea id="description" formControlName="description" rows="3" class="input"></textarea>
+      </div>
 
-        <!-- Documents multiples -->
-        <!-- <div formArrayName="documents" class="space-y-4 rounded-lg border p-4">
-          <h4 class="text-foreground border-b pb-2 font-semibold">📄 Documents</h4>
-          <div
-            *ngFor="let doc of documents.controls; let i = index"
-            [formGroupName]="i"
-            class="space-y-3 rounded-lg border p-4">
-            <div>
-              <label for="titleFile" class="text-muted-foreground mb-1 block text-xs"
-                >Titre du fichier <span class="text-red-500">*</span></label
-              >
-              <input
-                id="titleFile"
-                type="text"
-                formControlName="fileTitle"
-                class="input w-full"
-                placeholder="Nom du fichier" />
+      <!-- Motif -->
+      <div>
+        <label for="motif" class="text-muted-foreground mb-1 block text-xs">Motif</label>
+        <input id="motif" type="text" formControlName="motif" class="input" />
+      </div>
 
-              <div
-                *ngIf="doc.get('fileTitle')?.touched && doc.get('fileTitle')?.invalid"
-                class="mt-1 text-xs text-red-500">
-                *Le titre de fichier est requis.
-              </div>
-            </div>
-
-            <div>
-              <label class="text-muted-foreground mb-1 block text-xs">
-                <span class="sr-only">Choisir fichiers <span class="text-red-500">*</span></span>
-                <input
-                  type="file"
-                  (change)="onFileSelected($event, i)"
-                  multiple
-                  class="border-muted block w-full cursor-pointer rounded-lg border p-2 text-sm text-black focus:outline-none" />
-                <div
-                  class="text-sm text-red-500"
-                  *ngIf="doc.get('fileName')?.touched && doc.get('fileName')?.hasError('required')">
-                  Un fichier doit être sélectionné.
-                </div>
-              </label>
-            </div>
-
-            <button type="button" (click)="removeDocument(i)" class="rounded bg-red-500 px-3 py-1 text-xs text-white">
-              Supprimer
-            </button>
-          </div>
-
-          <button type="button" (click)="addDocument()" class="rounded bg-blue-500 px-3 py-2 text-xs text-white">
-            + Ajouter un document
-          </button>
+      <!-- Citoyen -->
+      <div>
+        <label for="citizenPublicId" class="text-muted-foreground mb-1 block text-xs">Citoyen *</label>
+        <select id="citizenPublicId" formControlName="citizenPublicId" class="input w-full">
+          <option value="">-- Sélectionner --</option>
+          <option *ngFor="let c of citizens$ | async" [value]="c.publicId">{{ c.firstName }} {{ c.lastName }}</option>
+        </select>
+        <div
+          *ngIf="requestForm.get('citizenPublicId')?.touched && requestForm.get('citizenPublicId')?.invalid"
+          class="text-xs text-red-500">
+          Le citoyen est obligatoire.
         </div>
-        -->
-
-        <!-- Documents multiples -->
-        <div formArrayName="documents" class="space-y-4 rounded-lg border p-4">
-          <h4 class="text-foreground border-b pb-2 font-semibold">📄 Documents</h4>
-          <div
-            *ngFor="let doc of documents.controls; let i = index"
-            [formGroupName]="i"
-            class="space-y-3 rounded-lg border p-4">
-            <!-- File Title -->
-            <div>
-              <label for="title" class="text-muted-foreground mb-1 block text-xs">
-                Titre du fichier <span class="text-red-500">*</span>
-              </label>
-              <input
-                name="title"
-                type="text"
-                formControlName="fileTitle"
-                class="input w-full"
-                placeholder="Nom du fichier" />
-              <div
-                *ngIf="doc.get('fileTitle')?.touched && doc.get('fileTitle')?.invalid"
-                class="mt-1 text-xs text-red-500">
-                *Le titre de fichier est requis.
-              </div>
-            </div>
-
-            <!-- Upload File -->
-            <div>
-              <input
-                type="file"
-                (change)="onFileSelected($event, i)"
-                class="border-muted block w-full cursor-pointer rounded-lg border p-2 text-sm text-black focus:outline-none" />
-              <div
-                class="text-sm text-red-500"
-                *ngIf="doc.get('fileName')?.touched && doc.get('fileName')?.hasError('required')">
-                Un fichier doit être sélectionné.
-              </div>
-            </div>
-
-            <button type="button" (click)="removeDocument(i)" class="rounded bg-red-500 px-3 py-1 text-xs text-white">
-              Supprimer
-            </button>
-          </div>
-
-          <button type="button" (click)="addDocument()" class="rounded bg-blue-500 px-3 py-2 text-xs text-white">
-            + Ajouter un document
-          </button>
-        </div>
+      </div>
+      <!-- Date demande -->
+      <div>
+        <label for="creationDate" class="text-muted-foreground mb-1 block text-xs">Date de creation</label>
+        <input
+          id="creationDate"
+          placeholder="Date de creation"
+          type="date"
+          formControlName="creationDate"
+          class="input w-full" />
 
         <div
-          *ngIf="archiveForm.get('documents')?.touched && archiveForm.get('documents')?.hasError('required')"
-          class="text-sm text-red-500">
-          Vous devez ajouter au moins un document.
-        </div>
-
-        <!-- Lieu stockage -->
-        <div>
-          <label for="stockage" class="text-muted-foreground mb-1 block text-xs"
-            >Lieu de stockage <span class="text-red-500">*</span></label
-          >
-          <select id="stockage" formControlName="storageLocation" class="w-full rounded-lg border px-3 py-2">
-            <option *ngFor="let s of lieuxStockage" [value]="s">{{ s }}</option>
-          </select>
+          *ngIf="requestForm.get('creationDate')?.touched && requestForm.get('creationDate')?.invalid"
+          class="mt-1 text-xs text-red-500">
+          *Date de creation requise.
         </div>
       </div>
-
-      <!-- Paramètres -->
-      <div class="space-y-4 rounded-lg border p-6">
-        <h3 class="border-b pb-2 text-lg font-semibold">Paramètres</h3>
-
-        <div>
-          <label for="confidentialite" class="text-muted-foreground mb-1 block text-xs"
-            >Confidentialité <span class="text-red-500">*</span></label
-          >
-          <select id="confidentialite" formControlName="confidentiality" class="input w-full">
-            <option *ngFor="let c of confidentialites" [value]="c">{{ c }}</option>
-          </select>
-
-          <div
-            class="text-sm text-red-500"
-            *ngIf="
-              archiveForm.get('confidentiality')?.touched && archiveForm.get('confidentiality')?.hasError('required')
-            ">
-            la confidentialité doit être sélectionné.
-          </div>
-        </div>
-
-        <div *ngIf="canChangeStatus">
-          <label for="status" class="text-muted-foreground mb-1 block text-xs"
-            >Status <span class="text-red-500">*</span></label
-          >
-          <select id="status" formControlName="status" class="input w-full">
-            <option *ngFor="let s of allowedStatuses" [value]="s.value">{{ s.label }}</option>
-          </select>
-          <div
-            class="text-sm text-red-500"
-            *ngIf="archiveForm.get('status')?.touched && archiveForm.get('status')?.hasError('required')">
-            Le statut est obligatoire.
-          </div>
-        </div>
+      <!-- Statut -->
+      <div *ngIf="canChangeStatus">
+        <label for="status" class="text-muted-foreground mb-1 block text-xs">Statut *</label>
+        <select id="status" formControlName="status" class="input w-full">
+          <option [value]="RequestStatus.PENDING">En attente</option>
+          <option [value]="RequestStatus.APPROVED">Approuvée</option>
+          <option [value]="RequestStatus.REJECTED">Rejetée</option>
+        </select>
       </div>
 
       <!-- Actions -->

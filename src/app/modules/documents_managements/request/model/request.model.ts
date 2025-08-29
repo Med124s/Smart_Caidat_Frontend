@@ -17,12 +17,13 @@ export interface RequestDocument {
   publicId?:string;
   type: RequestType;
   description?: string;
-  attachments?: string;
   motif?: string;
-  citizenPublicId: string;
-  creatorPublicId: string;
+  citizenPublicId?: string;
+  creatorPublicId?: string;
   validatorPublicId?: string;
+  citizen?:{firstname:string,lastName:string, publicId:string}
+  creationDate?:Date | string;
+  creator?: {lastName:string, firstname:string, publicId:string};
   status:RequestStatus;
-  trackingNumber?:string;
-  creationDate?: Date | string
+  validationDate?: Date | string;
 }

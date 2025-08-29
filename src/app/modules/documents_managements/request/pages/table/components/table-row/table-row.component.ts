@@ -1,54 +1,67 @@
-import { AsyncPipe, DatePipe, NgClass, NgIf } from '@angular/common';
+import { RequestStatus } from './../../../../../../../../../.history/src/app/modules/documents_managements/request/model/request.model_20250827040557';
+import { AsyncPipe, DatePipe, LowerCasePipe, NgClass, SlicePipe, NgIf } from '@angular/common';
 import { Component, EventEmitter, HostListener, inject, Input, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AngularSvgIconModule } from 'angular-svg-icon';
 import dayjs from 'dayjs';
-import { DocumentRequestModalComponent } from '../../../modal/request_modal/request-modal';
-import { map, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { ToastService } from 'src/app/shared/toast/toast.service';
-import { Archive } from 'src/app/modules/documents_managements/archive_document/model/archive.model';
-import { ArchiveSelectionService } from 'src/app/modules/documents_managements/archive_document/pages/table/services/archive_docs-selection.service';
-import { ArchiveService } from 'src/app/modules/documents_managements/archive_document/pages/table/services/archive-docs.service';
+import { RequestSelectionService } from '../../services/request_docs-selection.service';
+import { RequestService } from '../../services/request-docs.service';
+import { RequestDocument } from '../../../../model/request.model';
+import { PrettyTypePipe } from 'src/app/shared/pipes/PrettyTypePipe';
+import { State } from 'src/app/shared/models/state.model';
+import { ConnectedUser } from 'src/app/shared/models/user.model';
+import { Oauth2AuthService } from 'src/app/modules/auth/oauth2-auth.service';
 
 @Component({
   selector: '[app-request-table-row]',
-  imports: [FormsModule, AngularSvgIconModule, DatePipe, DocumentRequestModalComponent, AsyncPipe, NgClass, NgIf],
+  imports: [FormsModule, AngularSvgIconModule, AsyncPipe, DatePipe, NgClass, SlicePipe, PrettyTypePipe, NgIf],
   templateUrl: './table-row.component.html',
   styleUrl: './table-row.component.css',
 })
 export class TableRequestRowComponent implements OnInit {
-  @Input() selectedArchives: Archive[] = [];
+  @Input() selectedRequests: RequestDocument[] = [];
 
-  @Input() archive!: Archive | any;
-  @Input() archiveIds: string[] = [];
-  @Output() onDeleteSelected = new EventEmitter<Archive[]>();
-  @Output() detailArchive = new EventEmitter<Archive>();
+  @Input() request: RequestDocument | any;
+  @Input() requestIds: string[] = [];
+  @Output() onDeleteSelected = new EventEmitter<RequestDocument[]>();
+  @Output() detailRequest = new EventEmitter<RequestDocument>();
+  @Output() onUpdateStatus = new EventEmitter<{ request: RequestDocument; newStatus: RequestStatus }>();
 
-  selection = inject(ArchiveSelectionService);
-  selectionService = inject(ArchiveSelectionService);
+  RequestStatus = RequestStatus;
+  selection = inject(RequestSelectionService);
+  selectionService = inject(RequestSelectionService);
   showDocumentsModal: boolean = false;
-  archiveService = inject(ArchiveService);
-  categories = [
-    { id: 1, publicId: '3d47d76b-96ee-4d22-983d-aaedb16e1c6c', categoryName: 'Administration' },
-    { id: 2, publicId: 'aceffc2b-c481-4c90-a14c-38b5620dc562', categoryName: 'Correspondance' },
-    { id: 3, publicId: '3f57f4e3-758b-4a81-b9b3-dd7af13960ff', categoryName: 'collectivité territoriale' },
-    { id: 4, publicId: '7b85090e-2767-4800-993f-39cc228b65d0', categoryName: 'préfecture' },
-  ];
+  requestService = inject(RequestService);
   //@Input() selectedIds: string[] = []; // ✅ ids sélectionnés envoyés du parent
   @Output() selectionChange = new EventEmitter<string>();
   isSelected$!: Observable<boolean>;
   selectedDocuments: Document[] = [];
   minioBaseUrl = 'https://minio.example.com/bucket-name/'; // ou dynamiquement
   toastService = inject(ToastService);
-  ngOnInit(): void {
-    this.isSelected$ = this.selectionService.selectedArchives$.pipe(
-      map((set: Set<string>) => set.has(this.archive.publicId!)),
-    );
+  oauth2Auth = inject(Oauth2AuthService);
 
-    console.log("____________");
-    console.log(this.archive);
-    
+  // ngOnInit(): void {
+  //   // this.isSelected$ = this.selectionService.selectedRequests$.pipe(
+  //   //   map((set: Set<string>) => set.has(this.Request.publicId!)),
+  //   // );
 
+  //   // console.log("____________");
+  //   // console.log(this.Request);
+  //   console.log('hhey');
+  // }
+
+  canChangeStatus = false;
+
+  currentUser: ConnectedUser | null = null;
+  ngOnInit() {
+    const state: State<ConnectedUser> = this.oauth2Auth.fetchUser();
+
+    if (state.status === 'OK' && state.value) {
+      this.currentUser = state.value;
+    }
+    this.canChangeStatus = this.currentUser?.authorities?.includes('ROLE_ADMIN') ?? false;
   }
 
   @HostListener('click', ['$event'])
@@ -58,29 +71,29 @@ export class TableRequestRowComponent implements OnInit {
       return; // ne fait rien
     }
     // sinon, ouvre le modal
-    this.detailArchive.emit(this.archive);
+    this.detailRequest.emit(this.request);
   }
 
   isSelected(): boolean {
-    return this.selectionService.isSelected(this.archive.publicId!);
+    return this.selectionService.isSelected(this.request.publicId!);
   }
 
   toggleSelection(event: Event) {
     event.stopPropagation();
 
-    this.selectionService.toggleSelection(this.archive.publicId!);
+    this.selectionService.toggleSelection(this.request.publicId!);
     // optionnel : si tu veux notifier le parent à chaque sélection/désélection
-    this.selectionChange.emit(this.archive.publicId);
+    this.selectionChange.emit(this.request.publicId);
   }
   formatLastSeen(value?: any): string {
     if (!value) return '';
     return dayjs(value).format('DD/MM/YYYY HH:mm');
   }
 
-  // openDocuments(archive: Archive) {
+  // openDocuments(Request: Request) {
   //   // event.stopPropagation();
-  //   if (!archive.publicId) return;
-  //   this.archiveService.getDocumentsByArchive(archive.publicId).subscribe({
+  //   if (!Request.publicId) return;
+  //   this.RequestService.getDocumentsByRequest(Request.publicId).subscribe({
   //     next: (docs:any[]) => {
   //       this.selectedDocuments = docs.map((doc:any) => ({
   //         ...doc,
@@ -92,39 +105,71 @@ export class TableRequestRowComponent implements OnInit {
   //   this.showDocumentsModal = true;
   // }
 
-  openDocuments(archive: Archive, event: Event) {
+  openDocuments(request: RequestDocument, event: Event) {
     event.stopPropagation();
-  if (!archive.publicId) return;
+    if (!request.publicId) return;
 
-  this.archiveService.getDocumentsByArchive(archive.publicId).subscribe((state) => {
-    if (state.status === 'INIT') {
-      console.log("⏳ Chargement...");
-    }
+    // this.requestService.getDocumentsByRequest(request.publicId).subscribe((state) => {
+    //   if (state.status === 'INIT') {
+    //     console.log("⏳ Chargement...");
+    //   }
 
-    if (state.error) {
-      this.toastService.show('❌ Impossible de charger les documents', 'DANGER');
-    }
+    //   if (state.error) {
+    //     this.toastService.show('❌ Impossible de charger les documents', 'DANGER');
+    //   }
 
-    if (state.status === "OK" &&  state.value ) {
-      this.selectedDocuments = state.value?.map((doc: any) => ({
-        ...doc,
-        fileUrl:
-          doc.storageType === 'MINIO'
-            ? `${this.minioBaseUrl}${doc.fileName}`
-            : `assets/files/${doc.fileName}`,
-      }));
-      this.showDocumentsModal = true;
-    }
-  });
-}
-
-
+    //   if (state.status === "OK" &&  state.value ) {
+    //     this.selectedDocuments = state.value?.map((doc: any) => ({
+    //       ...doc,
+    //       fileUrl:
+    //         doc.storageType === 'MINIO'
+    //           ? `${this.minioBaseUrl}${doc.fileName}`
+    //           : `assets/files/${doc.fileName}`,
+    //     }));
+    //     this.showDocumentsModal = true;
+    //   }
+    // });
+  }
 
   closeDocuments() {
     this.showDocumentsModal = false;
   }
 
-  getCategoryName(publicId: string): string {
-    return this.categories.find((c) => c.publicId === publicId)?.categoryName || '';
+  openStatusMenu(request: any, event: Event) {
+    event.stopPropagation();
+  }
+  openMenuId: string | null = null;
+
+  toggleMenu(requestId: string) {
+    this.openMenuId = this.openMenuId === requestId ? null : requestId;
+  }
+
+  // updateStatus(request: RequestDocument, newStatus: RequestStatus) {
+
+  //   this.onUpdateStatus.emit(request, newStatus)
+  //   if (!request.publicId || !this.currentUser) {
+  //     this.toastService.show('❌ Impossible de changer le statut', 'DANGER');
+  //     return;
+  //   }
+  //   // نستخدم service خاص بـ updateStatus
+  //   this.requestService.updateStatus(request.publicId, newStatus, this.currentUser.publicId).subscribe((state) => {
+  //     if (state.status === 'OK' && state.value) {
+  //       // تحديث الـrow مباشرة
+  //       request.status = state.value.status;
+  //       request.validatorPublicId = state.value.validatorPublicId;
+  //       request.validationDate = state.value.validationDate;
+
+  //       this.toastService.show(`✅ Statut mis à jour: ${newStatus}`, 'SUCCESS');
+  //       this.openMenuId = null; // fermer le menu
+  //     } else {
+  //       this.toastService.show(`❌ Erreur lors du changement de statut`, 'DANGER');
+  //       console.error('Erreur:', state.error);
+  //     }
+  //   });
+  // }
+
+  updateStatus(request: RequestDocument, newStatus: RequestStatus) {
+    this.onUpdateStatus.emit({ request, newStatus });
+    this.openMenuId = null; // fermer le menu après action
   }
 }

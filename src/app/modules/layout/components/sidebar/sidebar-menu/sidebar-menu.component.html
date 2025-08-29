@@ -47,6 +47,14 @@
               [ngClass]="{ hidden: !menuService.showSideBar }"
               class="text-muted-foreground group-hover:text-primary truncate text-xs font-semibold tracking-wide focus:outline-hidden">
               {{ item.label }}
+              <!-- Badge notification -->
+               @if(item.label === "Gestion des documents"){
+              <span
+                *ngIf="(notificationService.pendingCount$ | async) as pendingCount"
+                class="absolute top-2 right-6 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[0.6rem] font-bold text-white">
+                {{ pendingCount }}
+              </span>
+              }
             </a>
           </div>
         </ng-template>

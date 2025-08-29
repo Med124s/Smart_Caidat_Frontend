@@ -1,17 +1,14 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, signal, SimpleChanges } from '@angular/core';
-import { AbstractControl, FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import { AsyncPipe, NgFor, NgIf } from '@angular/common';
-import { Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { CitizenSearchService } from 'src/app/modules/citoyen/pages/table/services/citizen-search.service';
-import { UserSearchService } from 'src/app/modules/uikit/pages/table/services/user-search.service';
-import { RegisterUser } from 'src/app/shared/models/user.model';
+import { RequestDocument, RequestStatus, RequestType } from '../../model/request.model';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Oauth2AuthService } from 'src/app/modules/auth/oauth2-auth.service';
+import { State } from 'src/app/shared/models/state.model';
+import { ConnectedUser } from 'src/app/shared/models/user.model';
+import { map, Observable, of } from 'rxjs';
 import { Citizen } from 'src/app/modules/citoyen/model/citoyen.model';
-import dayjs from 'dayjs';
-import { ToastService } from 'src/app/shared/toast/toast.service';
-import { Archive, ArchiveStatut, ArchiveType, Confidentiality, LieuStockage } from '../../../archive_document/model/archive.model';
-import { RequestDocument } from '../../model/request.model';
-import { RequestSearchService } from '../table/services/request-docs.service';
+import { CitizenSearchService } from 'src/app/modules/citoyen/pages/table/services/citizen-search.service';
+import { RequestService } from '../table/services/request-docs.service';
 
 @Component({
   selector: 'app-request-document',
@@ -20,215 +17,60 @@ import { RequestSearchService } from '../table/services/request-docs.service';
   templateUrl: './request-documents.component.html',
   styleUrls: ['./request-documents.component.css'],
 })
-export class RequestDocumentComponent implements OnInit, OnChanges {
-  @Input() archive: Archive | null = null;
+export class RequestDocumentComponent implements OnInit {
+  @Input() request: RequestDocument | null = null;
   @Input() visible = false;
   @Input() mode: 'create' | 'edit' = 'create';
 
   @Output() close = new EventEmitter<void>();
-  @Output() save = new EventEmitter<Archive>();
+  @Output() save = new EventEmitter<RequestDocument>();
 
-  archiveForm!: FormGroup;
-  ownerType: 'CITIZEN' | 'USER' | 'NONE' = 'NONE';
+  RequestType = RequestType;
+  RequestStatus = RequestStatus;
   selectedCitoyenId = '';
-  selectedUser = '';
-  demandesValidees$!: Observable<RequestDocument[]>;
-  users$: Observable<RegisterUser[]> = of([]);
   citizens$: Observable<Citizen[]> = of([]);
-  demandes = signal<RequestDocument[]>([]);
+  citizenService = inject(CitizenSearchService);
+  fb = inject(FormBuilder);
+  oauth2Auth = inject(Oauth2AuthService);
+  requestForm!: FormGroup;
+  requestService = inject(RequestService);
+  canChangeStatus = false;
 
-  archiveTypes = Object.values(ArchiveType);
-  archiveStatuts = Object.values(ArchiveStatut);
-  confidentialites = Object.values(Confidentiality);
-  lieuxStockage = Object.values(LieuStockage);
-
-  categories = [
-    { id: 1, publicId: '3d47d76b-96ee-4d22-983d-aaedb16e1c6c', categoryName: 'Administration' },
-    { id: 2, publicId: 'aceffc2b-c481-4c90-a14c-38b5620dc562', categoryName: 'Correspondance' },
-    { id: 3, publicId: '3f57f4e3-758b-4a81-b9b3-dd7af13960ff', categoryName: 'collectivité territoriale' },
-    { id: 4, publicId: '7b85090e-2767-4800-993f-39cc228b65d0', categoryName: 'préfecture' },
-  ];
-
-  allStatuses = [
-    { value: 'ON_HOLD', label: 'En attente' },
-    // { value: 'DELETED', label: 'Supprimé' },
-    { value: 'ACTIVE', label: 'Active' },
-    { value: 'ARCHIVED', label: 'Archivé' },
-  ];
-  currentUserRole = 'ADMIN';
-
-  private isSaving = false;
-
-  get canChangeStatus() {
-    return this.allowedStatuses.length > 0;
-  }
-  get allowedStatuses() {
-    if (this.currentUserRole === 'ADMIN') return this.allStatuses;
-    if (this.currentUserRole === 'SECRETAIRE') return this.allStatuses.filter((s) => s.value === 'ARCHIVE');
-    return [];
-  }
-
-  onCitoyenSelected(citoyenId: string) {
-    this.selectedCitoyenId = citoyenId;
-    if (!citoyenId) return;
-
-    const query: any = { page: { page: 0, size: 10, sort: ['dateCreation,DESC'] }, query: '' };
-    this.requestService.triggerFetchRequestsByCitizen(citoyenId, query);
-
-    this.demandesValidees$ = this.requestService.searchResultByCitizen.pipe(
-      map((state) => state.value?.data.filter((d: any) => d.status?.value === 'APPROVED') ?? []),
-    );
-  }
-
-  constructor(
-    private fb: FormBuilder,
-    private citizenService: CitizenSearchService,
-    private requestService: RequestSearchService,
-    private userService: UserSearchService,
-    private archiveService: ArchiveServicee,
-    private toastService: ToastService,
-  ) {
-    this.archiveForm = this.fb.group({
-      title: ['', Validators.required],
-      description: ['',  Validators.required],
-      categoryPublicId: ['', Validators.required],
-      citizenPublicId: [''],
-      status: ['ARCHIVE', Validators.required],
-      confidentiality: ['PUBLIC', Validators.required],
-      storageLocation: ['LOCAL', Validators.required],
-      ownerPublicId: [''],
-      ownerType: ['NONE'],
-      creationDate: [dayjs(new Date()).format('YYYY-MM-DDTHH:mm:ss')],
-      documents: this.fb.array([], this.minOneDocument),
+  constructor() {
+    this.requestForm = this.fb.group({
+      type: ['', Validators.required],
+      otherType: [''],
+      description: [''],
+      motif: [''],
+      citizenPublicId: ['', Validators.required],
+      status: [RequestStatus.PENDING], // default
+      creationDate: [new Date()],
     });
+
+    // UUID validatorPublicId,
+    // Instant validationDate,
   }
+  currentUser: ConnectedUser | null = null;
+  ngOnInit() {
+    this.loadCitizens();
+    const state: State<ConnectedUser> = this.oauth2Auth.fetchUser();
 
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['archive'] && this.archive) {
-      // Patch formulaire avec les valeurs de l'archive
-      this.archiveForm.patchValue({
-        title: this.archive.title,
-        description: this.archive.description,
-        categoryPublicId: this.archive.categoryPublicId,
-        citizenPublicId: this.archive.citizenPublicId,
-        // categoryName: this.archive.categoryName,
-        status: this.archive.status,
-        confidentiality: this.archive.confidentiality,
-        storageLocation: this.archive.storageLocation,
-        ownerPublicId: this.archive.ownerPublicId,
-        ownerType: this.archive.ownerType,
-        creationDate: this.archive.creationDate,
-      });
-
-      // Patch documents si présents
-      if (this.archive.documents?.length) {
-        this.patchDocuments(this.archive.documents);
-      } else {
-        this.documents.clear(); // sinon vide le FormArray
-      }
-
-      // Définir ownerType pour radio buttons
-      this.ownerType = this.archive.ownerType || 'NONE';
+    if (state.status === 'OK' && state.value) {
+      this.currentUser = state.value;
     }
+    this.canChangeStatus = this.currentUser?.authorities?.includes('ROLE_ADMIN') ?? false;
   }
 
-  ngOnInit(): void {
-    if (this.archive) {
-      this.archiveForm.patchValue(this.archive);
-      if (this.archive.documents?.length) this.patchDocuments(this.archive.documents);
-    }
-  }
-
-  get documents(): FormArray {
-    return this.archiveForm.get('documents') as FormArray;
-  }
-
-  minOneDocument(control: AbstractControl) {
-    const arr = control as FormArray;
-    return arr && arr.length > 0 ? null : { required: true };
-  }
-
-  addDocument(): void {
-    this.documents.push(
-      this.fb.group({
-        fileTitle: ['', Validators.required],
-        fileName: ['', Validators.required],
-        mimeType: [''],
-        size: [0],
-        uploadDate: ['', Validators.required],
-      }),
-    );
-  }
-
-  removeDocument(index: number) {
-    const docGroup = this.documents.at(index);
-    const docId = docGroup.get('id')?.value;
-    if (docId) {
-      this.archiveService.deleteDocument(docId).subscribe({
-        next: () => {
-          this.documents.removeAt(index);
-          this.toastService.show('📄 Document supprimé avec succès', 'SUCCESS');
-        },
-        error: () => this.toastService.show('❌ Erreur suppression', 'DANGER'),
-      });
-    } else {
-      this.documents.removeAt(index);
-    }
-  }
-
-  patchDocuments(docs: any[]) {
-    const formArray = this.fb.array(
-      docs.map((doc) =>
-        this.fb.group({
-          id: [doc.id],
-          publicId: [doc.publicId],
-          fileName: [doc.fileName],
-          fileTitle: [doc.fileTitle],
-          mimeType: [doc.mimeType],
-          // pas de "file", on garde juste l'existant
-        }),
-      ),
-    );
-
-    this.archiveForm.setControl('documents', formArray);
-
-    // ⚡ très important : mettre un marqueur pour dire que ce document n’a pas de fichier modifié
-    formArray.controls.forEach((ctrl: any) => {
-      ctrl._file = null;
-    });
-  }
-
-  onFileSelected(event: any, index: number) {
-    const file: File = event.target.files[0];
-    if (!file) return;
-
-    const docGroup = this.documents.at(index);
-    docGroup.patchValue({
-      fileName: file.name,
-      mimeType: file.type,
-      size: file.size,
-      uploadDate: dayjs(new Date()).format('YYYY-MM-DDTHH:mm:ss'),
-    });
-    // (docGroup as any)._file = file;
-    // ⚡ on garde le vrai fichier en mémoire pour l’upload
-    (docGroup as any)._file = file;
-  }
-
-  onOwnerTypeChange(type: 'CITIZEN' | 'USER' | 'NONE') {
-    this.ownerType = type;
-    this.archiveForm.patchValue({ ownerType: type, ownerPublicId: '' });
-    this.selectedCitoyenId = '';
-    this.selectedUser = '';
-    this.demandes.set([]);
-    if (type === 'USER') this.loadUsers();
-    if (type === 'CITIZEN') this.loadCitizens();
-  }
-
-  loadUsers() {
-    const query = { page: { page: 0, size: 10, sort: ['firstName,DESC'] }, query: '' };
-    this.users$ = this.userService.searchResult.pipe(map((state) => state.value?.users ?? []));
-    this.userService.search(query);
-  }
+  // onFileSelected(event: any) {
+  //   const file = (event.target as HTMLInputElement).files?.[0];
+  //   if (file) {
+  //     const reader = new FileReader();
+  //     reader.onload = () => {
+  //       this.requestForm.patchValue({ attachments: reader.result as string });
+  //     };
+  //     reader.readAsDataURL(file); // convert to base64
+  //   }
+  // }
 
   loadCitizens() {
     const query = { page: { page: 0, size: 10, sort: ['firstName,DESC'] }, query: '' };
@@ -236,82 +78,366 @@ export class RequestDocumentComponent implements OnInit, OnChanges {
     this.citizenService.searchCitizen(query);
   }
 
-  cancel() {
-    this.archiveForm.reset();
-    this.close.emit();
-  }
+  // onSubmit() {
+  //   if (this.requestForm.invalid) return;
+
+  //   const formValue = this.requestForm.value;
+
+  //   // gérer AUTRE
+  //   if (formValue.type === RequestType.AUTRE && formValue.otherType) {
+  //     formValue.description = `[Autre type: ${formValue.otherType}] ${formValue.description || ''}`;
+  //   }
+  //   const request: RequestDocument = {
+  //     ...formValue,
+  //     publicId: this.request?.publicId, // si edit
+  //     creatorPublicId: this.request?.creatorPublicId || this.currentUser?.publicId, // TODO: remplacer par vrai user connecté
+  //     creationDate: this.request?.creationDate || new Date(),
+  //   };
+
+  //   const obs$ = this.mode === 'create' ? this.requestService.create(request) : this.requestService.update(request);
+
+  //   obs$.subscribe((state) => {
+  //     if (state.status === 'OK' && state.value) {
+  //       this.save.emit(state.value);
+  //       this.close.emit();
+  //     } else if (state.status === 'ERROR') {
+  //       console.error('Erreur lors de la sauvegarde:', state.error);
+  //       // 👉 tu peux afficher un toaster ou message d'erreur ici
+  //     }
+  //   });
+  // }
 
   onSubmit() {
-    if (this.isSaving) return;
-    if (this.archiveForm.invalid) {
-      this.archiveForm.markAllAsTouched();
-      return;
+    if (this.requestForm.invalid) return;
+
+    const formValue = this.requestForm.value;
+
+    // gérer AUTRE
+    if (formValue.type === RequestType.AUTRE && formValue.otherType) {
+      formValue.description = `[Autre type: ${formValue.otherType}] ${formValue.description || ''}`;
     }
-    if (!this.documents.length) {
-      this.toastService.show('❌ Vous devez ajouter au moins un document', 'DANGER');
-      return;
-    }
 
-    this.isSaving = true;
-
-    // const categoryPublicId = this.archiveForm.get('categoryPublicId')?.value;
-    // const c = this.categories.find((cat) => cat.publicId == categoryPublicId)?.categoryName;
-
-    // Construire l'objet Archive à partir du formulaire
-    const archive: Archive = {
-      ...this.archive,
-      ...this.archiveForm.value,
-      documents: this.documents.controls.map((ctrl: any) => {
-        const docValue = ctrl.value;
-
-        // si l’utilisateur a choisi un nouveau fichier (_file existe)
-        const newFile: File | null = (ctrl as any)._file || null;
-        return {
-          id: docValue.id || null,
-          publicId: docValue.publicId || null,
-          fileName: docValue.fileName,
-          fileTitle: docValue.fileTitle,
-          mimeType: docValue.mimeType,
-          file: newFile, // seulement si modifié
-        };
-      }),
+    const request: RequestDocument = {
+      ...formValue,
+      publicId: this.request?.publicId, // si edit
+      creatorPublicId: this.request?.creatorPublicId || this.currentUser?.publicId,
+      creationDate: this.request?.creationDate || new Date(),
+      validatorPublicId: this.canChangeStatus ? this.currentUser?.publicId : this.request?.validatorPublicId,
     };
 
-    // fichiers à uploader séparément
-    // const filesToUpload: File[] = this.documents.controls
-    //   .map((ctrl: any) => (ctrl as any)._file || null)
-    //   .filter((f: File | null): f is File => !!f);
+    let obs$;
+    if (this.mode === 'create') {
+      obs$ = this.requestService.create(request);
+    } else {
+      // si seulement l'admin change le status, on peut appeler updateStatus
+      if (this.canChangeStatus && formValue.status !== this.request?.status && this.currentUser) {
+        obs$ = this.requestService.updateStatus(request.publicId!, formValue.status, this.currentUser.publicId!);
+      } else {
+        obs$ = this.requestService.update(request);
+      }
+    }
 
-    const filesToUpload: File[] = archive
-      .documents!.filter((d: any) => !d.publicId && d.file) // uniquement nouveaux
-      .map((d: any) => d.file);
-
-    console.log('. . . . . UPLOAD FILE');
-    console.log(filesToUpload);
-
-    // Extraire uniquement les fichiers nouveaux à uploader
-    // const filesToUpload: File[] = archive.documents!.map((d: any) => d.file).filter((f): f is File => !!f);
-
-    const save$ =
-      this.mode === 'create'
-        ? this.archiveService.createArchive(archive, filesToUpload)
-        : this.archiveService.updateArchive(this.archive!.publicId!, archive, filesToUpload);
-
-    save$.subscribe({
-      next: (res) => {
-        this.isSaving = false;
-        if (res.status === 'OK' && res.value) {
-          this.toastService.show(this.mode === 'create' ? 'Archive créée ✅' : 'Archive mise à jour ✅', 'SUCCESS');
-          this.save.emit(res.value);
-          this.close.emit();
-        } else {
-          this.toastService.show(this.mode === 'create' ? 'Erreur création ❌' : 'Erreur mise à jour ❌', 'DANGER');
-        }
-      },
-      error: () => {
-        this.isSaving = false;
-        this.toastService.show(this.mode === 'create' ? 'Erreur création ❌' : 'Erreur mise à jour ❌', 'DANGER');
-      },
+    obs$.subscribe((state) => {
+      if (state.status === 'OK' && state.value) {
+        this.save.emit(state.value);
+        this.close.emit();
+      } else if (state.status === 'ERROR') {
+        console.error('Erreur lors de la sauvegarde:', state.error);
+      }
     });
   }
+
+  cancel() {
+    this.requestForm.reset();
+    this.close.emit();
+  }
 }
+
+// @Input() archive: Archive | null = null;
+// @Input() visible = false;
+// @Input() mode: 'create' | 'edit' = 'create';
+
+// @Output() close = new EventEmitter<void>();
+// @Output() save = new EventEmitter<Archive>();
+
+// archiveForm!: FormGroup;
+// ownerType: 'CITIZEN' | 'USER' | 'NONE' = 'NONE';
+// selectedCitoyenId = '';
+// selectedUser = '';
+// demandesValidees$!: Observable<RequestDocument[]>;
+// users$: Observable<RegisterUser[]> = of([]);
+// citizens$: Observable<Citizen[]> = of([]);
+// demandes = signal<RequestDocument[]>([]);
+
+// archiveTypes = Object.values(ArchiveType);
+// archiveStatuts = Object.values(ArchiveStatut);
+// confidentialites = Object.values(Confidentiality);
+// lieuxStockage = Object.values(LieuStockage);
+
+// categories = [
+//   { id: 1, publicId: '3d47d76b-96ee-4d22-983d-aaedb16e1c6c', categoryName: 'Administration' },
+//   { id: 2, publicId: 'aceffc2b-c481-4c90-a14c-38b5620dc562', categoryName: 'Correspondance' },
+//   { id: 3, publicId: '3f57f4e3-758b-4a81-b9b3-dd7af13960ff', categoryName: 'collectivité territoriale' },
+//   { id: 4, publicId: '7b85090e-2767-4800-993f-39cc228b65d0', categoryName: 'préfecture' },
+// ];
+
+// allStatuses = [
+//   { value: 'ON_HOLD', label: 'En attente' },
+//   // { value: 'DELETED', label: 'Supprimé' },
+//   { value: 'ACTIVE', label: 'Active' },
+//   { value: 'ARCHIVED', label: 'Archivé' },
+// ];
+// currentUserRole = 'ADMIN';
+
+// private isSaving = false;
+
+// get canChangeStatus() {
+//   return this.allowedStatuses.length > 0;
+// }
+// get allowedStatuses() {
+//   if (this.currentUserRole === 'ADMIN') return this.allStatuses;
+//   if (this.currentUserRole === 'SECRETAIRE') return this.allStatuses.filter((s) => s.value === 'ARCHIVE');
+//   return [];
+// }
+
+// onCitoyenSelected(citoyenId: string) {
+//   this.selectedCitoyenId = citoyenId;
+//   if (!citoyenId) return;
+
+//   const query: any = { page: { page: 0, size: 10, sort: ['dateCreation,DESC'] }, query: '' };
+//   this.requestService.triggerFetchRequestsByCitizen(citoyenId, query);
+
+//   this.demandesValidees$ = this.requestService.searchResultByCitizen.pipe(
+//     map((state) => state.value?.data.filter((d: any) => d.status?.value === 'APPROVED') ?? []),
+//   );
+// }
+
+// constructor(
+//   private fb: FormBuilder,
+//   private citizenService: CitizenSearchService,
+//   private requestService: RequestSearchService,
+//   private userService: UserSearchService,
+//   private archiveService: ArchiveServicee,
+//   private toastService: ToastService,
+// ) {
+//   this.archiveForm = this.fb.group({
+//     title: ['', Validators.required],
+//     description: ['',  Validators.required],
+//     categoryPublicId: ['', Validators.required],
+//     citizenPublicId: [''],
+//     status: ['ARCHIVE', Validators.required],
+//     confidentiality: ['PUBLIC', Validators.required],
+//     storageLocation: ['LOCAL', Validators.required],
+//     ownerPublicId: [''],
+//     ownerType: ['NONE'],
+//     creationDate: [dayjs(new Date()).format('YYYY-MM-DDTHH:mm:ss')],
+//     documents: this.fb.array([], this.minOneDocument),
+//   });
+// }
+
+// ngOnChanges(changes: SimpleChanges) {
+//   if (changes['archive'] && this.archive) {
+//     // Patch formulaire avec les valeurs de l'archive
+//     this.archiveForm.patchValue({
+//       title: this.archive.title,
+//       description: this.archive.description,
+//       categoryPublicId: this.archive.categoryPublicId,
+//       citizenPublicId: this.archive.citizenPublicId,
+//       // categoryName: this.archive.categoryName,
+//       status: this.archive.status,
+//       confidentiality: this.archive.confidentiality,
+//       storageLocation: this.archive.storageLocation,
+//       ownerPublicId: this.archive.ownerPublicId,
+//       ownerType: this.archive.ownerType,
+//       creationDate: this.archive.creationDate,
+//     });
+
+//     // Patch documents si présents
+//     if (this.archive.documents?.length) {
+//       this.patchDocuments(this.archive.documents);
+//     } else {
+//       this.documents.clear(); // sinon vide le FormArray
+//     }
+
+//     // Définir ownerType pour radio buttons
+//     this.ownerType = this.archive.ownerType || 'NONE';
+//   }
+// }
+
+// ngOnInit(): void {
+//   if (this.archive) {
+//     this.archiveForm.patchValue(this.archive);
+//     if (this.archive.documents?.length) this.patchDocuments(this.archive.documents);
+//   }
+// }
+
+// get documents(): FormArray {
+//   return this.archiveForm.get('documents') as FormArray;
+// }
+
+// minOneDocument(control: AbstractControl) {
+//   const arr = control as FormArray;
+//   return arr && arr.length > 0 ? null : { required: true };
+// }
+
+// addDocument(): void {
+//   this.documents.push(
+//     this.fb.group({
+//       fileTitle: ['', Validators.required],
+//       fileName: ['', Validators.required],
+//       mimeType: [''],
+//       size: [0],
+//       uploadDate: ['', Validators.required],
+//     }),
+//   );
+// }
+
+// removeDocument(index: number) {
+//   const docGroup = this.documents.at(index);
+//   const docId = docGroup.get('id')?.value;
+//   if (docId) {
+//     this.archiveService.deleteDocument(docId).subscribe({
+//       next: () => {
+//         this.documents.removeAt(index);
+//         this.toastService.show('📄 Document supprimé avec succès', 'SUCCESS');
+//       },
+//       error: () => this.toastService.show('❌ Erreur suppression', 'DANGER'),
+//     });
+//   } else {
+//     this.documents.removeAt(index);
+//   }
+// }
+
+// patchDocuments(docs: any[]) {
+//   const formArray = this.fb.array(
+//     docs.map((doc) =>
+//       this.fb.group({
+//         id: [doc.id],
+//         publicId: [doc.publicId],
+//         fileName: [doc.fileName],
+//         fileTitle: [doc.fileTitle],
+//         mimeType: [doc.mimeType],
+//         // pas de "file", on garde juste l'existant
+//       }),
+//     ),
+//   );
+
+//   this.archiveForm.setControl('documents', formArray);
+
+//   // ⚡ très important : mettre un marqueur pour dire que ce document n’a pas de fichier modifié
+//   formArray.controls.forEach((ctrl: any) => {
+//     ctrl._file = null;
+//   });
+// }
+
+// onFileSelected(event: any, index: number) {
+//   const file: File = event.target.files[0];
+//   if (!file) return;
+
+//   const docGroup = this.documents.at(index);
+//   docGroup.patchValue({
+//     fileName: file.name,
+//     mimeType: file.type,
+//     size: file.size,
+//     uploadDate: dayjs(new Date()).format('YYYY-MM-DDTHH:mm:ss'),
+//   });
+//   // (docGroup as any)._file = file;
+//   // ⚡ on garde le vrai fichier en mémoire pour l’upload
+//   (docGroup as any)._file = file;
+// }
+
+// onOwnerTypeChange(type: 'CITIZEN' | 'USER' | 'NONE') {
+//   this.ownerType = type;
+//   this.archiveForm.patchValue({ ownerType: type, ownerPublicId: '' });
+//   this.selectedCitoyenId = '';
+//   this.selectedUser = '';
+//   this.demandes.set([]);
+//   if (type === 'USER') this.loadUsers();
+//   if (type === 'CITIZEN') this.loadCitizens();
+// }
+
+// loadUsers() {
+//   const query = { page: { page: 0, size: 10, sort: ['firstName,DESC'] }, query: '' };
+//   this.users$ = this.userService.searchResult.pipe(map((state) => state.value?.users ?? []));
+//   this.userService.search(query);
+// }
+
+// loadCitizens() {
+//   const query = { page: { page: 0, size: 10, sort: ['firstName,DESC'] }, query: '' };
+//   this.citizens$ = this.citizenService.searchResult.pipe(map((state) => state.value?.data ?? []));
+//   this.citizenService.searchCitizen(query);
+// }
+
+// onSubmit() {
+//   if (this.isSaving) return;
+//   if (this.archiveForm.invalid) {
+//     this.archiveForm.markAllAsTouched();
+//     return;
+//   }
+//   if (!this.documents.length) {
+//     this.toastService.show('❌ Vous devez ajouter au moins un document', 'DANGER');
+//     return;
+//   }
+
+//   this.isSaving = true;
+
+//   // const categoryPublicId = this.archiveForm.get('categoryPublicId')?.value;
+//   // const c = this.categories.find((cat) => cat.publicId == categoryPublicId)?.categoryName;
+
+//   // Construire l'objet Archive à partir du formulaire
+//   const archive: Archive = {
+//     ...this.archive,
+//     ...this.archiveForm.value,
+//     documents: this.documents.controls.map((ctrl: any) => {
+//       const docValue = ctrl.value;
+
+//       // si l’utilisateur a choisi un nouveau fichier (_file existe)
+//       const newFile: File | null = (ctrl as any)._file || null;
+//       return {
+//         id: docValue.id || null,
+//         publicId: docValue.publicId || null,
+//         fileName: docValue.fileName,
+//         fileTitle: docValue.fileTitle,
+//         mimeType: docValue.mimeType,
+//         file: newFile, // seulement si modifié
+//       };
+//     }),
+//   };
+
+//   // fichiers à uploader séparément
+//   // const filesToUpload: File[] = this.documents.controls
+//   //   .map((ctrl: any) => (ctrl as any)._file || null)
+//   //   .filter((f: File | null): f is File => !!f);
+
+//   const filesToUpload: File[] = archive
+//     .documents!.filter((d: any) => !d.publicId && d.file) // uniquement nouveaux
+//     .map((d: any) => d.file);
+
+//   console.log('. . . . . UPLOAD FILE');
+//   console.log(filesToUpload);
+
+//   // Extraire uniquement les fichiers nouveaux à uploader
+//   // const filesToUpload: File[] = archive.documents!.map((d: any) => d.file).filter((f): f is File => !!f);
+
+//   const save$ =
+//     this.mode === 'create'
+//       ? this.archiveService.createArchive(archive, filesToUpload)
+//       : this.archiveService.updateArchive(this.archive!.publicId!, archive, filesToUpload);
+
+//   save$.subscribe({
+//     next: (res) => {
+//       this.isSaving = false;
+//       if (res.status === 'OK' && res.value) {
+//         this.toastService.show(this.mode === 'create' ? 'Archive créée ✅' : 'Archive mise à jour ✅', 'SUCCESS');
+//         this.save.emit(res.value);
+//         this.close.emit();
+//       } else {
+//         this.toastService.show(this.mode === 'create' ? 'Erreur création ❌' : 'Erreur mise à jour ❌', 'DANGER');
+//       }
+//     },
+//     error: () => {
+//       this.isSaving = false;
+//       this.toastService.show(this.mode === 'create' ? 'Erreur création ❌' : 'Erreur mise à jour ❌', 'DANGER');
+//     },
+//   });
+// }

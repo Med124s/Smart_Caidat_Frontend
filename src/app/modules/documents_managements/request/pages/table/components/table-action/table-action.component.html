@@ -26,7 +26,7 @@
         <input
           name="search"
           class="py-2 pl-8 pr-2"
-          placeholder="Rechercher document"
+          placeholder="Rechercher demande"
           type="text"
           [value]="filters.title"
           (input)="onSearchChange($event)" />
@@ -52,7 +52,7 @@
     </div> -->
 
     <button
-      (click)="deleteSelectedArchives()"
+      (click)="deleteSelectedRequests()"
       class="bg-primary text-primary-foreground flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold">
       <svg
         xmlns="http://www.w3.org/2000/svg"

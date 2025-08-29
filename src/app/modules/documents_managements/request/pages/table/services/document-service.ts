@@ -6,7 +6,7 @@ import { HttpClient } from '@angular/common/http';
   providedIn: 'root'
 })
 export class DocumentService {
-  private apiUrl = 'http://localhost:8080/api/archives'; // بدل URL باللي عندك
+  private apiUrl = 'http://localhost:8080/api/requests'; // بدل URL باللي عندك
 
   constructor(private http: HttpClient) {}
 

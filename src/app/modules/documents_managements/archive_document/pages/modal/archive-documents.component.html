@@ -96,7 +96,7 @@
                 class="input w-full"
                 (change)="onCitoyenSelected($any($event.target).value)">
                 <option value="">-- Sélectionner --</option>
-                <option *ngFor="let c of citizens" [value]="c.publicId">{{ c.firstName }} {{ c.lastName }}</option>
+                <option *ngFor="let c of citizens" [value]="c.publicId">{{ c.firstName }} {{ c.lastName }}</option>+
               </select>
             </div>
             <p *ngIf="citizens.length === 0" class="text-red-600">Aucun citoyen disponible.</p>
