@@ -13,6 +13,8 @@ import { PrettyTypePipe } from 'src/app/shared/pipes/PrettyTypePipe';
 import { State } from 'src/app/shared/models/state.model';
 import { ConnectedUser } from 'src/app/shared/models/user.model';
 import { Oauth2AuthService } from 'src/app/modules/auth/oauth2-auth.service';
+import { HttpClient } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: '[app-request-table-row]',
@@ -41,6 +43,7 @@ export class TableRequestRowComponent implements OnInit {
   minioBaseUrl = 'https://minio.example.com/bucket-name/'; // ou dynamiquement
   toastService = inject(ToastService);
   oauth2Auth = inject(Oauth2AuthService);
+  http = inject(HttpClient);
 
   // ngOnInit(): void {
   //   // this.isSelected$ = this.selectionService.selectedRequests$.pipe(
@@ -105,31 +108,31 @@ export class TableRequestRowComponent implements OnInit {
   //   this.showDocumentsModal = true;
   // }
 
-  openDocuments(request: RequestDocument, event: Event) {
-    event.stopPropagation();
-    if (!request.publicId) return;
+  // openDocuments(request: RequestDocument, event: Event) {
+  //   event.stopPropagation();
+  //   if (!request.publicId) return;
 
-    // this.requestService.getDocumentsByRequest(request.publicId).subscribe((state) => {
-    //   if (state.status === 'INIT') {
-    //     console.log("⏳ Chargement...");
-    //   }
+  //   // this.requestService.getDocumentsByRequest(request.publicId).subscribe((state) => {
+  //   //   if (state.status === 'INIT') {
+  //   //     console.log("⏳ Chargement...");
+  //   //   }
 
-    //   if (state.error) {
-    //     this.toastService.show('❌ Impossible de charger les documents', 'DANGER');
-    //   }
+  //   //   if (state.error) {
+  //   //     this.toastService.show('❌ Impossible de charger les documents', 'DANGER');
+  //   //   }
 
-    //   if (state.status === "OK" &&  state.value ) {
-    //     this.selectedDocuments = state.value?.map((doc: any) => ({
-    //       ...doc,
-    //       fileUrl:
-    //         doc.storageType === 'MINIO'
-    //           ? `${this.minioBaseUrl}${doc.fileName}`
-    //           : `assets/files/${doc.fileName}`,
-    //     }));
-    //     this.showDocumentsModal = true;
-    //   }
-    // });
-  }
+  //   //   if (state.status === "OK" &&  state.value ) {
+  //   //     this.selectedDocuments = state.value?.map((doc: any) => ({
+  //   //       ...doc,
+  //   //       fileUrl:
+  //   //         doc.storageType === 'MINIO'
+  //   //           ? `${this.minioBaseUrl}${doc.fileName}`
+  //   //           : `assets/files/${doc.fileName}`,
+  //   //     }));
+  //   //     this.showDocumentsModal = true;
+  //   //   }
+  //   // });
+  // }
 
   closeDocuments() {
     this.showDocumentsModal = false;
@@ -172,4 +175,84 @@ export class TableRequestRowComponent implements OnInit {
     this.onUpdateStatus.emit({ request, newStatus });
     this.openMenuId = null; // fermer le menu après action
   }
+
+    // 👁 Voir documents
+  openDocuments(request: any, event: Event) {
+    event.stopPropagation();
+    if (request.documentUrl) {
+      window.open(request.documentUrl, '_blank');
+    } else {
+      alert('Aucun document disponible');
+    }
+  }
+
+    // 📥 Télécharger document
+  downloadDocument(request: any, event: Event) {
+    event.stopPropagation();
+    this.http.get(`${environment.API_URL}/requests/${request.publicId}/document`, { responseType: 'blob' })
+      .subscribe(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `document-${request.publicId}.pdf`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      });
+  }
+
+  // 📄 Générer certificat
+  generateCertificate(request: any, event: Event) {
+    event.stopPropagation();
+    this.http.get(`/api/requests/${request.publicId}/certificate`, { responseType: 'blob' })
+      .subscribe(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `certificat-${request.publicId}.pdf`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      });
+  }
+
+  // ⬆️ Upload documents
+// ⬆️ Upload documents
+uploadDocuments(request: any, event: Event) {
+  event.stopPropagation();
+
+  // Vérifier si le document est approuvé
+  if (request.status?.value !== 'APPROVED') {
+    alert('Le document doit être approuvé pour pouvoir uploader un fichier.');
+    return;
+  }
+
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'application/pdf,image/*';
+
+  input.onchange = () => {
+    if (!input.files || input.files.length === 0) return;
+
+    const formData = new FormData();
+    formData.append('file', input.files[0]);
+
+    this.http.post(`${environment.API_URL}/requests/${request.publicId}/upload`, formData)
+      .subscribe({
+        next: (res: any) => {
+          alert('Document uploadé avec succès ✅');
+
+          // Mettre à jour la propriété documentUrl pour afficher le lien
+          if (res.documentUrl) {
+            request.documentUrl = res.documentUrl;
+          }
+        },
+        error: (err) => {
+          console.error(err);
+          alert('Erreur lors de l’upload ❌');
+        }
+      });
+  };
+
+  input.click();
+}
+
 }

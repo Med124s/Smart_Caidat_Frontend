@@ -9,6 +9,8 @@ import { map, Observable, of } from 'rxjs';
 import { Citizen } from 'src/app/modules/citoyen/model/citoyen.model';
 import { CitizenSearchService } from 'src/app/modules/citoyen/pages/table/services/citizen-search.service';
 import { RequestService } from '../table/services/request-docs.service';
+import { HttpClient } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-request-document',
@@ -35,6 +37,8 @@ export class RequestDocumentComponent implements OnInit {
   requestForm!: FormGroup;
   requestService = inject(RequestService);
   canChangeStatus = false;
+  http = inject(HttpClient);
+  selectedFile: File | null = null;
 
   constructor() {
     this.requestForm = this.fb.group({
@@ -42,6 +46,7 @@ export class RequestDocumentComponent implements OnInit {
       otherType: [''],
       description: [''],
       motif: [''],
+      documentUrl: [''],
       citizenPublicId: ['', Validators.required],
       status: [RequestStatus.PENDING], // default
       creationDate: [new Date()],
@@ -107,44 +112,135 @@ export class RequestDocumentComponent implements OnInit {
   //   });
   // }
 
+  // onSubmit() {
+  //   if (this.requestForm.invalid) return;
+
+  //   const formValue = this.requestForm.value;
+
+  //   // gérer AUTRE
+  //   if (formValue.type === RequestType.AUTRE && formValue.otherType) {
+  //     formValue.description = `[Autre type: ${formValue.otherType}] ${formValue.description || ''}`;
+  //   }
+
+  //   const request: RequestDocument = {
+  //     ...formValue,
+  //     publicId: this.request?.publicId, // si edit
+  //     creatorPublicId: this.request?.creatorPublicId || this.currentUser?.publicId,
+  //     creationDate: this.request?.creationDate || new Date(),
+  //     documentUrl: formValue.documentUrl, // url du document uploadé par l'admin
+  //     validatorPublicId: this.canChangeStatus ? this.currentUser?.publicId : this.request?.validatorPublicId,
+  //   };
+
+  //   let obs$;
+  //   if (this.mode === 'create') {
+  //     obs$ = this.requestService.create(request);
+  //   } else {
+  //     // si seulement l'admin change le status, on peut appeler updateStatus
+  //     if (this.canChangeStatus && formValue.status !== this.request?.status && this.currentUser) {
+  //       obs$ = this.requestService.updateStatus(request.publicId!, formValue.status, this.currentUser.publicId!);
+  //     } else {
+  //       obs$ = this.requestService.update(request);
+  //     }
+  //   }
+
+  //   obs$.subscribe((state) => {
+  //     if (state.status === 'OK' && state.value) {
+  //       this.save.emit(state.value);
+  //       this.close.emit();
+  //     } else if (state.status === 'ERROR') {
+  //       console.error('Erreur lors de la sauvegarde:', state.error);
+  //     }
+  //   });
+  // }
+
+  // onFileSelected(event: Event) {
+  //   const input = event.target as HTMLInputElement;
+  //   if (!input.files || input.files.length === 0) return;
+  //   const file: File = input.files[0];
+  //   if (!this.canChangeStatus) {
+  //     alert('Seul un administrateur peut uploader un document.');
+  //     return;
+  //   }
+  //   const formData = new FormData();
+  //   formData.append('file', file);
+
+  //   this.http
+  //     .post<{ documentUrl: string }>(
+  //       `${environment.API_URL}/requests/uploadDocument`, // endpoint backend pour upload lors de la création
+  //       formData,
+  //     )
+  //     .subscribe({
+  //       next: (res) => {
+  //         alert('Document uploadé avec succès ✅');
+  //         if (res.documentUrl) {
+  //           this.requestForm.patchValue({ documentUrl: res.documentUrl });
+  //         }
+  //       },
+  //       error: (err) => {
+  //         console.error(err);
+  //         alert('Erreur lors de l’upload ❌');
+  //       },
+  //     });
+  // }
+
   onSubmit() {
-    if (this.requestForm.invalid) return;
+  if (this.requestForm.invalid) return;
 
-    const formValue = this.requestForm.value;
+  const formValue = this.requestForm.value;
+  const file: File = formValue.documentFile;
 
-    // gérer AUTRE
-    if (formValue.type === RequestType.AUTRE && formValue.otherType) {
-      formValue.description = `[Autre type: ${formValue.otherType}] ${formValue.description || ''}`;
-    }
+  // gérer le type "AUTRE"
+  if (formValue.type === RequestType.AUTRE && formValue.otherType) {
+    formValue.description = `[Autre type: ${formValue.otherType}] ${formValue.description || ''}`;
+  }
 
-    const request: RequestDocument = {
-      ...formValue,
-      publicId: this.request?.publicId, // si edit
-      creatorPublicId: this.request?.creatorPublicId || this.currentUser?.publicId,
-      creationDate: this.request?.creationDate || new Date(),
-      validatorPublicId: this.canChangeStatus ? this.currentUser?.publicId : this.request?.validatorPublicId,
-    };
+  const request: RequestDocument = {
+    ...formValue,
+    publicId: this.request?.publicId,
+    creatorPublicId: this.request?.creatorPublicId || this.currentUser?.publicId,
+    creationDate: this.request?.creationDate || new Date(),
+    validatorPublicId: this.canChangeStatus ? this.currentUser?.publicId : this.request?.validatorPublicId,
+  };
 
-    let obs$;
-    if (this.mode === 'create') {
-      obs$ = this.requestService.create(request);
-    } else {
-      // si seulement l'admin change le status, on peut appeler updateStatus
-      if (this.canChangeStatus && formValue.status !== this.request?.status && this.currentUser) {
-        obs$ = this.requestService.updateStatus(request.publicId!, formValue.status, this.currentUser.publicId!);
-      } else {
-        obs$ = this.requestService.update(request);
-      }
-    }
+  const formData = new FormData();
+  formData.append('request', new Blob([JSON.stringify(request)], { type: 'application/json' }));
 
-    obs$.subscribe((state) => {
+  if (file) {
+    formData.append('file', file);
+  }
+
+  const obs$ = this.mode === 'create'
+    ? this.requestService.createWithFile(formData)
+    : this.requestService.updateWithFile(formData);
+
+  obs$.subscribe({
+    next: (state) => {
       if (state.status === 'OK' && state.value) {
         this.save.emit(state.value);
         this.close.emit();
       } else if (state.status === 'ERROR') {
         console.error('Erreur lors de la sauvegarde:', state.error);
       }
-    });
+    },
+    error: (err) => console.error('Erreur submit:', err)
+  });
+}
+
+
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+
+    const file = input.files[0];
+
+    // Vérifier si l'utilisateur est admin
+    if (!this.canChangeStatus) {
+      alert('Seul un administrateur peut uploader un document.');
+      return;
+    }
+
+    // Stocker le fichier dans le FormGroup
+    this.requestForm.patchValue({ documentFile: file });
   }
 
   cancel() {

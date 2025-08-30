@@ -23,6 +23,7 @@ export interface RequestDocument {
   validatorPublicId?: string;
   citizen?:{firstname:string,lastName:string, publicId:string}
   creationDate?:Date | string;
+  documentUrl:string;
   creator?: {lastName:string, firstname:string, publicId:string};
   status:RequestStatus;
   validationDate?: Date | string;

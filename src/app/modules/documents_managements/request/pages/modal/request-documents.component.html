@@ -81,6 +81,21 @@
           <option [value]="RequestStatus.REJECTED">Rejetée</option>
         </select>
       </div>
+      @if (canChangeStatus) {
+      <div>
+        <label for="docUpload" class="text-muted-foreground mb-2 block text-xs font-semibold"
+          >Télécharger document</label
+        >
+        <div>
+          <input
+            id="docUpload"
+            type="file"
+            formControlName="documentUrl"
+            (change)="onFileSelected($event)"
+            class="text-background border-muted bg-foreground block w-full cursor-pointer rounded-lg border p-2 text-sm focus:outline-none" />
+        </div>
+      </div>
+      }
 
       <!-- Actions -->
       <div class="mt-4 flex justify-end gap-2 border-t pt-4">

@@ -62,6 +62,14 @@ export class RequestService {
     formData.append('file', file, `certificat_${requestId}.pdf`);
     return this.http.post(`${environment.API_URL}/requests/${requestId}/certificate`, formData);
   }
+  
+  createWithFile(formData: FormData): Observable<State<RequestDocument>> {
+    return this.http.post<State<RequestDocument>>(`${environment.API_URL}/requests`, formData);
+  }
+
+  updateWithFile(formData: FormData): Observable<State<RequestDocument>> {
+    return this.http.put<State<RequestDocument>>(`${environment.API_URL}/requests`, formData);
+  }
 
   //   updateStatus(
   //   requestId: string,
