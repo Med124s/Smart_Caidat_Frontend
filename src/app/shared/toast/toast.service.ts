@@ -10,12 +10,15 @@ export class ToastService {
 
   constructor() { }
 
-  show(body: string, type: "SUCCESS" | "DANGER") {
+  show(body: string, type: "SUCCESS" | "DANGER" | "WARNING") {
     let className;
     if(type === "DANGER") {
       className = "bg-red-500 text-light";
-    } else {
+    } else if(type === "SUCCESS") {
       className = "bg-green-500 text-light";
+    }
+    else{
+      className = "bg-yellow-500 text-light"
     }
     const toastInfo: ToastInfo = {body, className};
     this.toasts.push(toastInfo);

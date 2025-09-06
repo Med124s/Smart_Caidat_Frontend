@@ -40,6 +40,7 @@ export class Menu {
           children: [
             { label: 'Archives administratives', route: '/document_management/archives' },
             { label: 'Demandes de documents', route: '/document_management/requests' },
+            // { label: 'Demandes en attentes', route: '/document_management/en attentes' },
           ],
         },
       ],
@@ -83,6 +84,17 @@ export class Menu {
           icon: 'assets/icons/heroicons/outline/users.svg',
           label: 'Citoyens',
           route: '/citoyens',
+        },
+      ],
+    },
+    {
+      group: "Gestion des réclamations",
+      separator: true,
+      items: [
+        {
+          icon: 'assets/icons/heroicons/outline/user-circle.svg',
+          label: 'Réclamations',
+          route: '/réclamations',
         },
       ],
     },

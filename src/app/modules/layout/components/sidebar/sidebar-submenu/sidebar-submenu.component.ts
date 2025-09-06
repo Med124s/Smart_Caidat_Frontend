@@ -21,6 +21,7 @@ export class SidebarSubmenuComponent implements OnInit {
   currentUser: ConnectedUser | null = null;
   oauth2Auth = inject(Oauth2AuthService);
   notificationService = inject(NotificationService);
+  isAdmin = false;
   constructor(public menuService: MenuService) {}
 
   // ngOnInit() {
@@ -33,9 +34,15 @@ export class SidebarSubmenuComponent implements OnInit {
   //   }
   // }
 
-  
   ngOnInit() {
-    this.notificationService.pendingCount$.subscribe(count => this.pendingCount = count);
+    const state = this.oauth2Auth.fetchUser();
+    if (state.status === 'OK' && state.value) {
+      this.currentUser = state.value;
+      if (this.currentUser.authorities?.includes('ROLE_ADMIN')) {
+        this.isAdmin = true;
+      }
+    }
+    this.notificationService.pendingCount$.subscribe((count) => (this.pendingCount = count));
     this.notificationService.loadPendingCount();
   }
 

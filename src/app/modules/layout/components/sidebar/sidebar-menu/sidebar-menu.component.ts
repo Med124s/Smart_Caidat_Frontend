@@ -23,7 +23,7 @@ import { NotificationService } from 'src/app/modules/documents_managements/reque
     RouterLinkActive,
     NgIf,
     SidebarSubmenuComponent,
-    AsyncPipe
+    AsyncPipe,
   ],
 })
 export class SidebarMenuComponent implements OnInit {
@@ -33,6 +33,7 @@ export class SidebarMenuComponent implements OnInit {
   notificationService = inject(NotificationService);
 
   checkNotification = false;
+  isAdmin = false;
 
   constructor(public menuService: MenuService) {}
 
@@ -49,10 +50,15 @@ export class SidebarMenuComponent implements OnInit {
   //     }
   //   }
   // }
-
   ngOnInit() {
-    this.notificationService.pendingCount$.subscribe(count => this.pendingCount = count);
+    const state = this.oauth2Auth.fetchUser();
+    if (state.status === 'OK' && state.value) {
+      this.currentUser = state.value;
+      if (this.currentUser.authorities?.includes('ROLE_ADMIN')) {
+        this.isAdmin = true;
+      }
+    }
+    this.notificationService.pendingCount$.subscribe((count) => (this.pendingCount = count));
     this.notificationService.loadPendingCount();
   }
-
 }

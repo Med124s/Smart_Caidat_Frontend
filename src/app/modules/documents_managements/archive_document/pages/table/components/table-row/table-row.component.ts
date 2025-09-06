@@ -77,21 +77,6 @@ export class TableArchiveRowComponent implements OnInit {
     return dayjs(value).format('DD/MM/YYYY HH:mm');
   }
 
-  // openDocuments(archive: Archive) {
-  //   // event.stopPropagation();
-  //   if (!archive.publicId) return;
-  //   this.archiveService.getDocumentsByArchive(archive.publicId).subscribe({
-  //     next: (docs:any[]) => {
-  //       this.selectedDocuments = docs.map((doc:any) => ({
-  //         ...doc,
-  //         fileUrl: doc.storageType === 'MINIO' ? `${this.minioBaseUrl}${doc.fileName}` : `assets/files/${doc.fileName}`,
-  //       }));
-  //     },
-  //     error: () => this.toastService.show('❌ Impossible de charger les documents', 'DANGER'),
-  //   });
-  //   this.showDocumentsModal = true;
-  // }
-
   openDocuments(archive: Archive, event: Event) {
     event.stopPropagation();
   if (!archive.publicId) return;
