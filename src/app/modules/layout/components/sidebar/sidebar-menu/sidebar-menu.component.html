@@ -36,6 +36,14 @@
               routerLinkActive="text-primary"
               class="truncate text-xs font-semibold tracking-wide focus:outline-hidden">
               {{ item.label }}
+             @if(item.label === "Réclamations" && isAdmin){
+              <span
+                *ngIf="notificationService.pendingComplaintCount$ | async as pendingComplaintCount"
+                class="absolute top-2 right-21 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[0.6rem] font-bold text-white">
+                {{ pendingComplaintCount }}
+              </span>
+              }
+
             </a>
           </div>
         </ng-template>
@@ -48,9 +56,10 @@
               class="text-muted-foreground group-hover:text-primary truncate text-xs font-semibold tracking-wide focus:outline-hidden">
               {{ item.label }}
               <!-- Badge notification -->
-               @if(item.label === "Gestion des documents" && isAdmin){
+              @if(item.label === "Gestion des documents" && isAdmin){
+
               <span
-                *ngIf="(notificationService.pendingCount$ | async) as pendingCount"
+                *ngIf="notificationService.pendingCount$ | async as pendingCount"
                 class="absolute top-2 right-6 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[0.6rem] font-bold text-white">
                 {{ pendingCount }}
               </span>

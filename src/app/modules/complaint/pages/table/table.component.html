@@ -1,0 +1,113 @@
+<div class="mb-4 flex items-center justify-between">
+  <!-- Titre + compteur -->
+  <div>
+    <h3 class="text-foreground text-lg font-semibold">Réclamations</h3>
+    <div class="text-muted-foreground text-xs font-medium">
+      <span>Toutes les réclamation: </span>
+      <span class="text-foreground font-semibold">{{ totalItems() }}</span>
+    </div>
+  </div>
+
+  <!-- Actions principales -->
+  <div class="flex items-center gap-2">
+    <!-- Export CSV -->
+    <!-- <button class="bg-muted text-muted-foreground hover:text-foreground rounded-md px-3 py-2 text-xs font-semibold">
+      Exporter CSV
+    </button> -->
+
+    <!-- Ajouter -->
+    <button
+      class="bg-primary text-primary-foreground rounded-md px-3 py-2 text-xs font-semibold"
+      (click)="showCreateModal()">
+      + Ajouter Réclamation
+    </button>
+  </div>
+</div>
+
+<!-- Modal -->
+
+<app-complaints-request
+  [hidden]="!showModal"
+  [complaint]="selectedComplaint()"
+  [mode]="modalMode"
+  (save)="saveComplaint($event)"
+  (close)="showModal = false">
+</app-complaints-request>
+
+<!-- Table -->
+<div class="border-muted/20 bg-background flex min-w-full flex-col rounded-xl border p-2">
+  <!-- Actions filtrage / recherche -->
+  <!-- <app-archive-table-action
+    [selectedIds]="selectedIds()"
+    (search)="onSearch($event)"
+    (filter)="onFilter($event)"
+    [selectedArchives]="selectedArchives"
+    (deleteSelected)="onDeleteSelected($event)">
+  </app-archive-table-action> -->
+
+  <app-complaints-table-action
+    [selectedIds]="selectedIds()"
+    [selectedcomplaints]="selectedcomplaints"
+    (filter)="onFilter($event)"
+    (deleteSelected)="onDeleteSelected($event)">
+  </app-complaints-table-action>
+  <!-- Table -->
+  <div
+    class="scrollbar-thumb-rounded scrollbar-track-rounded scrollbar-thin scrollbar-track-transparent scrollbar-thumb-muted grow overflow-x-auto px-5">
+    <table
+      class="text-muted-foreground table w-full table-auto border-collapse border-0 text-left align-middle leading-5">
+      <thead class="border-muted/20 text-muted-foreground border text-xs">
+        <!-- <tr app-archive-table-header  (onCheck)="toggleAllSelection($event)"></tr> -->
+        <tr app-complaints-table-header [complaintsIds]="visibleIds"></tr>
+        <!-- <tr app-request-table-header></tr> -->
+      </thead>
+
+      <!-- Rows -->
+      <tbody>
+        @for (complaint of visiblecomplaints() || []; track $index) {
+        <!-- <tr
+          class="hover:bg-card/50"
+          app-request-table-row
+          [request]="request"
+          [selectedRequests]="selectedRequests"
+          (onDeleteSelected)="onDeleteSelected($event)"
+          (detailRequest)="detailRequest($event)"></tr> -->
+        <tr
+          class="hover:bg-card/50"
+          app-complaints-table-row
+          [complaint]="complaint"
+          [selectedcomplaints]="selectedcomplaints"
+          (onDeleteSelected)="onDeleteSelected($event)"
+          (onUpdateStatus)="handleStatusUpdate($event)"
+          (detailcomplaint)="detailComplaint($event)"
+          (aboutComplaint)="onAboutcomplaint($event)"
+          ></tr>
+        } @empty {
+        <tr>
+          <td class="py-4 text-center text-sm" colspan="7">🚫 Aucune réclamation trouvée</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+
+    <!-- Loader -->
+    @if (loadingSearch()) {
+    <div class="py-6 text-center text-gray-600">
+      <div class="inline-flex items-center gap-2">
+        <div class="h-5 w-5 animate-spin rounded-full border-2 border-blue-500 border-t-transparent"></div>
+        <span>Chargement...</span>
+      </div>
+    </div>
+    }
+  </div>
+
+  <!-- Pagination -->
+  <app-complaints-table-footer
+    [currentPage]="searchPage.page"
+    [totalPages]="totalPages()"
+    [totalItems]="totalItems()"
+    [size]="searchPage.size"
+    (pageChange)="onPageChange($event)"
+    (sizeChange)="onSizeChange($event)">
+  </app-complaints-table-footer>
+</div>

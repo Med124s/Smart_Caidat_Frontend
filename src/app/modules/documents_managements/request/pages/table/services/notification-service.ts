@@ -36,11 +36,23 @@ export class NotificationService {
       .subscribe((count) => this._pendingCount.next(count));
   }
 
+  loadPendingCompalintCount() {
+    this.http
+      .get<number>(`${environment.API_URL}/complaints/pending/count`)
+      .subscribe((count) => this._pendingComplaintCount.next(count));
+  }
+
   private _pendingCount = new BehaviorSubject<number>(0);
   pendingCount$ = this._pendingCount.asObservable();
 
+  private _pendingComplaintCount = new BehaviorSubject<number>(0);
+  pendingComplaintCount$ = this._pendingComplaintCount.asObservable();
+
   setPendingCount(count: number) {
     this._pendingCount.next(count);
+  }
+  setPendingComplaintCount(count: number) {
+    this._pendingComplaintCount.next(count);
   }
 
   decrementPendingCount() {
@@ -49,9 +61,17 @@ export class NotificationService {
       this._pendingCount.next(current - 1);
     }
   }
-
+  decrementPendingComplaintCount() {
+    const current = this._pendingComplaintCount.value;
+    if (current > 0) {
+      this._pendingComplaintCount.next(current - 1);
+    }
+  }
 
   incrementPendingCount() {
     this._pendingCount.next(this._pendingCount.value + 1);
+  }
+  incrementPendingComplaintCount() {
+    this._pendingComplaintCount.next(this._pendingComplaintCount.value + 1);
   }
 }

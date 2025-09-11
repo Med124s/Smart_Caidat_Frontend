@@ -33,6 +33,12 @@ const routes: Routes = [
     loadChildren: () => import('../documents_managements/request/request_documents.module').then((m) => m.RequestModule),
     //canActivate:[adminGuard]
   },
+  {
+    path: 'reclamations',
+    component: LayoutComponent,
+    loadChildren: () => import('../complaint/complaints.module').then((m) => m.ComplaintsModule),
+    //canActivate:[adminGuard]
+  },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: '**', redirectTo: 'error/404' },
 ];

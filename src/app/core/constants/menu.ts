@@ -40,7 +40,6 @@ export class Menu {
           children: [
             { label: 'Archives administratives', route: '/document_management/archives' },
             { label: 'Demandes de documents', route: '/document_management/requests' },
-            // { label: 'Demandes en attentes', route: '/document_management/en attentes' },
           ],
         },
       ],
@@ -91,10 +90,20 @@ export class Menu {
       group: "Gestion des réclamations",
       separator: true,
       items: [
+        // {
+        //   icon: 'assets/icons/heroicons/outline/download.svg',
+        //   label: 'Download',
+        //   route: '/download',
+        // },
+        // {
+        //   icon: 'assets/icons/heroicons/outline/gift.svg',
+        //   label: 'Gift Card',
+        //   route: '/gift',
+        // },
         {
-          icon: 'assets/icons/heroicons/outline/user-circle.svg',
+          icon: 'assets/icons/heroicons/outline/users.svg',
           label: 'Réclamations',
-          route: '/réclamations',
+          route: '/reclamations',
         },
       ],
     },

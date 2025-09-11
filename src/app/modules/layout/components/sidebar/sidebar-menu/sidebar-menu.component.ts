@@ -28,6 +28,7 @@ import { NotificationService } from 'src/app/modules/documents_managements/reque
 })
 export class SidebarMenuComponent implements OnInit {
   pendingCount: number = 0;
+  pendingComplaintCount: number = 0;
   currentUser: ConnectedUser | null = null;
   oauth2Auth = inject(Oauth2AuthService);
   notificationService = inject(NotificationService);
@@ -60,5 +61,8 @@ export class SidebarMenuComponent implements OnInit {
     }
     this.notificationService.pendingCount$.subscribe((count) => (this.pendingCount = count));
     this.notificationService.loadPendingCount();
+
+    this.notificationService.pendingComplaintCount$.subscribe((count) => (this.pendingComplaintCount = count));
+    this.notificationService.loadPendingCompalintCount();
   }
 }

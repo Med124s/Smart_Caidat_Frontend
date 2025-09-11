@@ -12,12 +12,13 @@ import { NotificationService } from 'src/app/modules/documents_managements/reque
   selector: 'app-sidebar-submenu',
   templateUrl: './sidebar-submenu.component.html',
   styleUrls: ['./sidebar-submenu.component.css'],
-  imports: [NgClass, NgFor, NgTemplateOutlet, RouterLinkActive, RouterLink, AngularSvgIconModule, NgIf],
+  imports: [NgClass, NgFor, NgTemplateOutlet, RouterLinkActive, RouterLink, AngularSvgIconModule],
 })
 export class SidebarSubmenuComponent implements OnInit {
   @Input() public submenu = <SubMenuItem>{};
 
   pendingCount: number = 0;
+  pendingComplaintCount: number = 0;
   currentUser: ConnectedUser | null = null;
   oauth2Auth = inject(Oauth2AuthService);
   notificationService = inject(NotificationService);
@@ -44,6 +45,11 @@ export class SidebarSubmenuComponent implements OnInit {
     }
     this.notificationService.pendingCount$.subscribe((count) => (this.pendingCount = count));
     this.notificationService.loadPendingCount();
+
+    this.notificationService.pendingComplaintCount$.subscribe((count) => (this.pendingComplaintCount = count));
+    this.notificationService.loadPendingCompalintCount();
+
+    
   }
 
   public toggleMenu(menu: any) {

@@ -1,0 +1,161 @@
+<ng-container>
+  <!-- ✅ Checkbox sélection -->
+  <td class="text-center" (click)="toggleSelection($event)">
+    <input
+      class="checkbox checkbox-sm"
+      data-datatable-row-check="true"
+      type="checkbox"
+      [checked]="selectionService.isSelected(complaint.publicId!)" />
+  </td>
+
+  <!-- <td>{{ complaint.title }}</td> -->
+  <!-- 🏷️ Titre -->
+  <td>{{ complaint.type | prettyComplaintType }}</td>
+
+  <!-- <td>
+    {{ complaint.description.length > 50 ? (complaint.description | slice: 0:50) + '...' : complaint.description }}
+  </td> -->
+  <td>
+    {{ complaint.description.length > 50 ? (complaint.description | slice: 0:50) + '...' : complaint.description }}
+  </td>
+  <td>
+    <span
+      [ngClass]="{
+        'bg-yellow-100 text-yellow-800': complaint.priority === 'LOW',
+        'bg-blue-100 text-blue-800': complaint.priority === 'MEDIUM',
+        'bg-green-100 text-green-800': complaint.priority === 'HIGH',
+        'bg-red-100 text-red-800': complaint.priority === 'URGENT',
+      }"
+      class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium">
+      {{
+        complaint.priority === 'LOW'
+          ? 'Basse'
+          : complaint.priority === 'MEDIUM'
+          ? 'Moyenne'
+          : complaint.priority === 'HIGH'
+          ? 'Élevée'
+          : complaint.priority === 'URGENT'
+          ? 'Urgente'
+          : 'Basse'
+      }}
+    </span>
+  </td>
+
+  <!-- <td>{{ 'Monir creator' }}</td>
+  <td>{{ 'Monir validator' }}</td> -->
+  <td>{{ complaint.citizen.firstName }} {{ complaint.citizen.lastName }}</td>
+
+  <td>
+    <span
+      [ngClass]="{
+        'bg-green-100 text-green-800': complaint.status === 'RESOLVED',
+        'bg-red-100 text-red-800': complaint.status === 'REJECTED',
+        'bg-blue-100 text-blue-800': complaint.status === 'OPEN',
+        'bg-yellow-100 text-yellow-800': complaint.status === 'IN_PROGRESS',
+      }"
+      class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium">
+      {{
+        complaint.status === 'RESOLVED'
+          ? 'Résolue'
+          : complaint.status === 'REJECTED'
+          ? 'Rejetée'
+          : complaint.status === 'OPEN'
+          ? 'Ouverte'
+          : complaint.status === 'IN_PROGRESS'
+          ? 'En cours'
+          : 'Ouverte'
+      }}
+    </span>
+  </td>
+
+  <td>{{ complaint.reason }}</td>
+  <td>{{ complaint.creationDate | date: 'yyyy-MM-dd HH:mm:ss' }}</td>
+  <td>{{ complaint.validationDate | date: 'yyyy-MM-dd HH:mm:ss' }}</td>
+
+  <!-- ✅ Action -->
+  <td *ngIf="canChangeStatus" class="relative">
+    <!-- Icône pour ouvrir/fermer le menu -->
+    <button (click)="toggleMenu(complaint.publicId, $event)" class="cursor-pointer rounded p-1 hover:bg-gray-200">
+      <!-- <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="currentColor"
+        class="size-6 text-orange-500">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+      </svg> -->
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="currentColor"
+        class="size-6 text-purple-400">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
+      </svg>
+    </button>
+
+    <!-- Menu dropdown -->
+    <div
+      *ngIf="openMenuId === complaint.publicId"
+      class="absolute right-0 z-10 mt-2 w-28 rounded-md border bg-white shadow-lg">
+      <button
+        class="block w-full px-3 py-1 text-left text-xs hover:bg-green-100"
+        (click)="updateStatus(complaint, ComplaintStatus.RESOLVED, $event)">
+        Résolue
+      </button>
+
+      <button
+        class="block w-full px-3 py-1 text-left text-xs hover:bg-red-100"
+        (click)="updateStatus(complaint, ComplaintStatus.REJECTED, $event)">
+        Rejetée
+      </button>
+
+      <button
+        class="block w-full px-3 py-1 text-left text-xs hover:bg-blue-100"
+        (click)="updateStatus(complaint, ComplaintStatus.OPEN, $event)">
+        Ouverte
+      </button>
+      <button
+        class="block w-full px-3 py-1 text-left text-xs hover:bg-yellow-100"
+        (click)="updateStatus(complaint, ComplaintStatus.IN_PROGRESS, $event)">
+        En cours
+      </button>
+    </div>
+
+    <button (click)="updateComplaint($event)" class="cursor-pointer rounded hover:bg-gray-200">
+      <!-- <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="currentColor"
+        class="size-6 text-green-500">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+      </svg> -->
+
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="currentColor"
+        class="size-6 text-yellow-500">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M7.5 7.5h-.75A2.25 2.25 0 0 0 4.5 9.75v7.5a2.25 2.25 0 0 0 2.25 2.25h7.5a2.25 2.25 0 0 0 2.25-2.25v-7.5a2.25 2.25 0 0 0-2.25-2.25h-.75m0-3-3-3m0 0-3 3m3-3v11.25m6-2.25h.75a2.25 2.25 0 0 1 2.25 2.25v7.5a2.25 2.25 0 0 1-2.25 2.25h-7.5a2.25 2.25 0 0 1-2.25-2.25v-.75" />
+      </svg>
+    </button>
+  </td>
+</ng-container>
