@@ -26,65 +26,23 @@
         </div>
 
         <div class="flex flex-col rounded-xl bg-white p-5 shadow-md">
-          <div class="text-sm text-gray-500">Stockage utilisé</div>
+          <div class="text-sm text-gray-500">Réclamation total</div>
           <div class="mt-2 text-3xl font-bold text-gray-800">
             {{ kpis.storageUsedBytes ?? 0 | number }}
           </div>
-          <div class="mt-1 text-xs text-gray-400">octets</div>
+          <div class="mt-1 text-xs text-gray-400">En attente : 0</div>
         </div>
       </ng-container>
     </div>
 
     <!-- Row charts -->
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-      <!-- Line chart -->
-      <div class="rounded-xl bg-white p-5 shadow-md">
-        <h3 class="mb-3 text-sm font-semibold text-gray-700">Évolution des demandes</h3>
-        <canvas
-          *ngIf="lineChartData$ | async as ldata"
-          baseChart
-          [data]="ldata"
-          [options]="lineChartOptions"
-          chartType="line">
-        </canvas>
-      </div>
-
-      <!-- Bar chart -->
-      <div class="rounded-xl bg-white p-5 shadow-md">
-        <h3 class="mb-3 text-sm font-semibold text-gray-700">Demandes par utilisateur</h3>
-        <canvas
-          *ngIf="barChartData$ | async as bdata"
-          baseChart
-          [data]="bdata"
-          [options]="barChartOptions"
-          chartType="bar">
-        </canvas>
-      </div>
-    </div>
-
-    <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
-      <!-- Réclamations par statut (optionnel) -->
-      <div class="rounded-lg bg-white p-4 shadow">
-        <h3 class="mb-2 text-sm font-medium">Réclamations par status</h3>
-        <canvas
-          *ngIf="complaintsByStatus$ | async as cdata"
-          baseChart
-          [data]="cdata"
-          [options]="complaintsByStatusOptions"
-          chartType="bar">
-        </canvas>
-      </div>
-    </div>
-
-    <div class="space-y-6 p-6">
-      <!-- Réclamations par catégorie -->
-      <div class="rounded-lg bg-white p-4 shadow">
+      <div class="rounded-xl bg-white p-4 shadow">
         <h3 class="mb-4 text-sm font-medium">Répartition des réclamations par catégorie</h3>
         <canvas baseChart [data]="complaintsByCategory" [options]="complaintsByCategoryOptions" [type]="'pie'">
         </canvas>
       </div>
 
-      <!-- Réclamations par citoyen -->
       <div class="rounded-lg bg-white p-4 shadow">
         <h3 class="mb-4 text-sm font-medium">Top citoyens par nombre de réclamations</h3>
         <canvas baseChart [data]="complaintsByCitizen" [options]="complaintsByCitizenOptions" chartType="bar"> </canvas>

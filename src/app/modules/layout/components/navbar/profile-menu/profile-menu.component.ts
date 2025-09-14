@@ -41,18 +41,18 @@ export class ProfileMenuComponent {
   private _router = inject(Router)
   public profileMenu = [
     {
-      title: 'Your Profile',
+      title: 'Mon profil',
       icon: './assets/icons/heroicons/outline/user-circle.svg',
       clickLink:()=> this.profile(),
      
     },
     {
-      title: 'edit profile',
+      title: 'Modifier le profil',
       icon: './assets/icons/heroicons/outline/cog-6-tooth.svg',
       clickLink:()=> this.editProfile(),
     },
     {
-      title: 'Log out',
+      title: 'Se déconnecter',
       icon: './assets/icons/heroicons/outline/logout.svg',
       link: '',
       clickLink:()=>this.logout()
