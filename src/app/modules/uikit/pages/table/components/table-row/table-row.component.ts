@@ -1,4 +1,4 @@
-import { Component, inject, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AngularSvgIconModule } from 'angular-svg-icon';
 import { RegisterUser } from 'src/app/shared/models/user.model';
@@ -15,6 +15,9 @@ import dayjs from 'dayjs';
 export class TableRowComponent implements OnChanges {
   @Input() user: RegisterUser = {};
   @Input() userIds: string[] = [];
+  @Output() detailUser = new EventEmitter<any>();
+  @Output() onUpdateUser = new EventEmitter<any>();
+
   avatarPreview: string | ArrayBuffer | null = null;
   isSelected: boolean = false;
   userService = inject(UserSearchService);
@@ -37,7 +40,7 @@ export class TableRowComponent implements OnChanges {
   //   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['user'] && this.user) {
+    if (changes['user']) {
       if (this.user.imageUrl) {
         if (this.user.imageUrl.startsWith('/uploads/')) {
           this.avatarPreview = 'http://localhost:8080' + this.user.imageUrl;
@@ -61,5 +64,18 @@ export class TableRowComponent implements OnChanges {
   formatLastSeen(value?: any): string {
     if (!value) return '';
     return dayjs(value).format('DD/MM/YYYY HH:mm');
+  }
+
+  showUser(user: any) {
+    console.log('______________show user');
+    console.log(user);
+
+    this.detailUser.emit(user);
+  }
+
+  updateUser(user: any) {
+    console.log('Update user   __ row');
+    console.log(user);
+    this.onUpdateUser.emit(user);
   }
 }

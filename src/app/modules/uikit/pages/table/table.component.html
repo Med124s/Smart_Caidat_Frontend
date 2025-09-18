@@ -11,18 +11,29 @@
       class="bg-muted text-muted-foreground hover:text-foreground flex-none rounded-md px-4 py-2.5 text-xs font-semibold">
       Import CSV
     </button>
-    <button (click)="toggleModal()"
+    <button
+      (click)="createUser()"
       class="bg-primary text-primary-foreground flex-none rounded-md px-4 py-2.5 text-xs font-semibold">
       Ajouter utilisateurs
     </button>
 
-    <app-user [visible]="showModalCreate" (close)="showModalCreate = false" (create)="addUser($event)"></app-user>
+    <!-- <app-user [visible]="showModalCreate" (close)="showModalCreate = false" (create)="addUser($event)"></app-user> -->
 
-    <app-user [user]=userUpdate [visibleUpdate]="showModalUpdate" (close)="showModalUpdate = false"
-      (update)="updateUser($event)"></app-user>
+    <!-- <app-user [user]=userUpdate [visibleUpdate]="showModalUpdate" (close)="showModalUpdate = false"
+      (update)="updateUser($event)"></app-user> -->
 
+    <app-user
+      [hidden]="!showModal"
+      [user]="selectedUser()"
+      [mode]="modalMode"
+      (save)="saveUser($event)"
+      (close)="showModal = false" 
+      >
+    </app-user>
   </div>
 </div>
+
+
 
 <div class="border-muted/20 bg-background flex min-w-full flex-col rounded-xl border p-2">
   <app-table-action [usersResults]="usersResults" [updateUsersResults]="updateUsersResults"></app-table-action>
@@ -37,11 +48,16 @@
       <tbody>
         @for (user of filteredUsers(); track $index) {
         <!-- <tr class="hover:bg-card/50" app-table-row [user]="user" (click)="detailUser(user)"></tr> -->
-        <tr class="hover:bg-card/50" app-table-row [user]="user" (click)="detailUser(user)">
+        <tr
+          class="hover:bg-card/50"
+          app-table-row
+          [user]="user"
+          (onDeleteSelected)="onDeleteSelected($event)"
+          (detailUser)="detailUser($event)"
+          (onUpdateUser)="onUpdateUser($event)"
+          >
         </tr>
-
-        }
-        @empty {
+        } @empty {
         <tr>
           <td class="py-4 text-center text-sm" colspan="7">No users found</td>
         </tr>
@@ -49,16 +65,20 @@
       </tbody>
     </table>
     @if (loadingSearch()) {
-    <div class="text-center py-4">
+    <div class="py-4 text-center">
       <div class="inline-flex items-center gap-2">
         <div class="h-5 w-5 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
         <span class="text-gray-600">Chargement...</span>
       </div>
     </div>
     }
-
   </div>
-  <app-table-footer [currentPage]="searchPage.page" [totalPages]="totalPages()" [totalItems]="totalItems()"
-    [size]="searchPage.size" (pageChange)="onPageChange($event)" (sizeChange)="onSizeChange($event)">
+  <app-table-footer
+    [currentPage]="searchPage.page"
+    [totalPages]="totalPages()"
+    [totalItems]="totalItems()"
+    [size]="searchPage.size"
+    (pageChange)="onPageChange($event)"
+    (sizeChange)="onSizeChange($event)">
   </app-table-footer>
 </div>

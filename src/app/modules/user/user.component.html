@@ -1,4 +1,4 @@
-@if (visible) {
+<!-- @if (mode !== "about") {
 <div class="fixed inset-0 flex items-center justify-center bg-foreground  z-50 opacity-95">
     <div class="bg-card text-white p-6 rounded-lg w-full max-w-2xl">
         <h2 class="text-xl text-foreground font-semibold mb-4">Ajouter un nouvel utilisateur</h2>
@@ -123,7 +123,9 @@
 </div>
 }
 
-@if (visibleUpdate) {
+
+ @if (visibleUpdate) {
+
 <div class="fixed inset-0 flex items-center justify-center bg-foreground  z-50 opacity-95">
     <div class="bg-card text-white p-6 rounded-lg w-full max-w-2xl">
         <h2 class="text-xl text-foreground font-semibold mb-4">Update utilisateur</h2>
@@ -250,4 +252,167 @@
         </form>
     </div>
 </div>
-}
+} -->
+
+<!-- FORMULAIRE POUR CREATE / EDIT -->
+<div *ngIf="mode !== 'about'" class="bg-foreground fixed inset-0 z-50 flex items-center justify-center opacity-95">
+  <div class="bg-card w-full max-w-2xl rounded-lg p-6 text-white">
+    <h2 class="text-foreground mb-4 text-xl font-semibold">
+      {{ mode === 'create' ? 'Ajouter un nouvel utilisateur' : 'Modifier utilisateur' }}
+    </h2>
+
+    <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="space-y-4">
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <input id="firstName" type="text" formControlName="firstName" placeholder="Prénom" class="input" />
+          <div
+            *ngIf="userForm.get('firstName')?.touched && userForm.get('firstName')?.invalid"
+            class="mt-1 text-xs text-red-500">
+            *Le prénom est requis.
+          </div>
+        </div>
+        <div>
+          <input id="lastName" type="text" formControlName="lastName" placeholder="Nom" class="input" />
+          <div
+            *ngIf="userForm.get('lastName')?.touched && userForm.get('lastName')?.invalid"
+            class="mt-1 text-xs text-red-500">
+            *Le nom est requis.
+          </div>
+        </div>
+      </div>
+
+      <input id="email" type="email" formControlName="email" placeholder="exemple@domaine.com" class="input w-full" />
+      <div *ngIf="userForm.get('email')?.touched && userForm.get('email')?.invalid" class="mt-1 text-xs text-red-500">
+        *Email est requis.
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div class="relative">
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            formControlName="password"
+            placeholder="Mot de Passe"
+            class="input" />
+          <button type="button" (click)="showPassword = !showPassword" class="absolute right-2 top-2">
+            {{ showPassword ? '🙈' : '👁️' }}
+          </button>
+          <!-- <div
+            *ngIf="userForm.get('password')?.touched && userForm.get('password')?.invalid"
+            class="mt-1 text-xs text-red-500">
+            *Password est requis.
+          </div> -->
+
+          <div
+            *ngIf="userForm.get('password')?.touched && userForm.get('password')?.errors"
+            class="mt-1 text-xs text-red-500">
+            <div *ngIf="userForm.get('password')?.errors?.['required']">Le mot de passe est requis.</div>
+            <div *ngIf="userForm.get('password')?.errors?.['minLength']">Min. 8 caractères</div>
+            <div *ngIf="userForm.get('password')?.errors?.['uppercase']">Au moins une majuscule</div>
+            <div *ngIf="userForm.get('password')?.errors?.['lowercase']">Au moins une minuscule</div>
+            <div *ngIf="userForm.get('password')?.errors?.['number']">Au moins un chiffre</div>
+            <div *ngIf="userForm.get('password')?.errors?.['special']">Au moins un caractère spécial (ex: !{{"@"}} # $ %)</div>
+          </div>
+        </div>
+        <div class="relative">
+          <input
+            [type]="showConfirmPassword ? 'text' : 'password'"
+            formControlName="confirmPassword"
+            placeholder="Confirmer le Mot de Passe"
+            class="input" />
+          <button type="button" (click)="showConfirmPassword = !showConfirmPassword" class="absolute right-2 top-2">
+            {{ showConfirmPassword ? '🙈' : '👁️' }}
+          </button>
+          <div
+            *ngIf="userForm.get('confirmPassword')?.touched && userForm.get('confirmPassword')?.invalid"
+            class="mt-1 text-xs text-red-500">
+            <div *ngIf="userForm.get('confirmPassword')?.errors?.['required']">La confirmation est requise.</div>
+            <div *ngIf="userForm.get('confirmPassword')?.errors?.['mismatch']">
+              Les mots de passe ne correspondent pas.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <select formControlName="authorities" class="input w-full" multiple>
+        <option disabled [selected]="true">Role</option>
+        <option value="ROLE_AGENT_AUTHORITY">Agent d'autorité</option>
+        <option value="ROLE_SECRETARY">Secrétaire</option>
+        <option value="ROLE_ADMIN">Administrateur</option>
+      </select>
+      <div>
+        <span class="text-muted-foreground mb-4 block text-sm font-semibold">Télécharger l'image</span>
+        <div class="flex items-center gap-5">
+          @if(avatarPreview){
+          <img alt="user avatar" class="h-9 w-9 shrink-0 rounded-full" [src]="avatarPreview" />
+          } @else {
+          <img class="size-11 shrink-0 rounded-md" src="https://avatars.githubusercontent.com/u/12519008?v=4" alt="" />
+          }
+          <label class="text-muted-foreground w-full">
+            <input
+              type="file"
+              (change)="onFileChange($event)"
+              class="text-background border-muted bg-foreground block w-full cursor-pointer rounded-lg border p-2 text-sm focus:outline-none"
+              id="file_input" />
+          </label>
+        </div>
+      </div>
+
+      <div class="mt-4 flex justify-end gap-2">
+        <button
+          class="hover:bg-primary-600 text-primary-foreground flex-none rounded-md bg-green-400 px-4 py-2.5 text-xs font-semibold"
+          type="submit">
+          Save
+        </button>
+        <button
+          class="hover:bg-primary-600 text-primary-foreground flex-none rounded-md bg-red-500 px-4 py-2.5 text-xs font-semibold"
+          (click)="cancel()">
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- AFFICHAGE ABOUT MODE -->
+<div *ngIf="mode === 'about'" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+  <div class="bg-card relative w-full max-w-lg rounded-2xl p-6 shadow-lg">
+    <!-- Bouton fermer -->
+    <button (click)="cancel()" class="text-muted-foreground hover:text-foreground absolute top-3 right-3">✖</button>
+
+    <!-- Header -->
+    <div class="border-muted/30 flex flex-col items-center gap-2 border-b pb-3">
+      <img
+        [src]="avatarPreview || 'https://ui-avatars.com/api/?name=Utilisateur&background=random&size=128'"
+        class="ring-primary/30 h-20 w-20 rounded-full object-cover ring-4"
+        alt="avatar" />
+      <h2 class="text-foreground text-lg font-semibold">{{ user?.firstName }} {{ user?.lastName }}</h2>
+      <p class="text-muted-foreground text-xs">{{ user?.email }}</p>
+    </div>
+
+    <!-- Infos avec grid -->
+    <div class="mt-4 grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
+      <!-- Colonne des labels -->
+      <div class="text-muted-foreground flex flex-col gap-2 font-medium">
+        <span>Nom complet:</span>
+        <span>Email:</span>
+        <span>Rôle:</span>
+      </div>
+
+      <!-- Colonne des valeurs -->
+      <div class="flex flex-col gap-2">
+        <span class="text-foreground">{{ user?.firstName }} {{ user?.lastName }}</span>
+        <span class="text-foreground break-words">{{ user?.email }}</span>
+        <span class="text-primary">{{ user?.authorities?.join(', ') }}</span>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="mt-5 flex justify-end">
+      <button
+        (click)="cancel()"
+        class="bg-primary text-primary-foreground rounded-lg px-5 py-2 text-sm font-medium hover:opacity-90">
+        Fermer
+      </button>
+    </div>
+  </div>
+</div>

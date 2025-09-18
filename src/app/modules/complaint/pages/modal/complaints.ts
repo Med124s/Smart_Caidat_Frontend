@@ -32,7 +32,7 @@ import { PrettyComplaintPriorityPipe } from 'src/app/shared/pipes/PrettyComplain
 })
 export class ComplaintsRequestComponent implements OnInit, OnChanges {
   @Input() complaint: Complaint | any | null = null;
-  @Input() visible = false;
+  // @Input() visible = false;
   @Input() mode: 'create' | 'edit' | 'about' = 'create';
 
   @Output() close = new EventEmitter<void>();

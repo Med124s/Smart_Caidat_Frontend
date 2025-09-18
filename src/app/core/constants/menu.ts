@@ -10,7 +10,7 @@ export class Menu {
           icon: 'assets/icons/heroicons/outline/chart-pie.svg',
           label: 'Tableau de bord',
           route: '/dashboard',
-          children: [{ label: 'Statistiques', route: '/dashboard/nfts' }],
+          children: [{ label: 'Statistiques', route: '/dashboard/statistics' }],
         },
         // {
         //   icon: 'assets/icons/heroicons/outline/lock-closed.svg',

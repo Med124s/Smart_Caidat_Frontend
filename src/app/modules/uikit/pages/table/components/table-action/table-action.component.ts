@@ -20,7 +20,7 @@ export class TableActionComponent {
   @Input() updateUsersResults!: (fn: (users: RegisterUser[]) => RegisterUser[]) => void;
 
   constructor() {
-    effect(() => this.listenToDeleteResult());
+    // effect(() => this.listenToDeleteResult());
   }
   onSearchChange(value: Event) {
     const input = value.target as HTMLInputElement;
@@ -63,31 +63,31 @@ export class TableActionComponent {
     });
   }
 
-  listenToDeleteResult() {
-    this.userService.delete.subscribe((state) => {
-      if (state.status === 'OK') {
-        const deletedIds = state.value as string[]; // tableau d'IDs supprimés
+  // listenToDeleteResult() {
+  //   this.userService.delete.subscribe((state) => {
+  //     if (state.status === 'OK') {
+  //       const deletedIds = state.value as string[]; // tableau d'IDs supprimés
 
-        // 🔥 Supprimer localement les utilisateurs
-        this.updateUsersResults((users) => users.filter((user) => !deletedIds.includes(user.publicId!)));
+  //       // 🔥 Supprimer localement les utilisateurs
+  //       this.updateUsersResults((users) => users.filter((user) => !deletedIds.includes(user.publicId!)));
 
-        Swal.fire({
-          icon: 'success',
-          title: 'Suppression réussie',
-          text: `${state.value}`,
-          confirmButtonColor: '#22c55e',
-        });
-        this.selectionService.clearSelection();
-      } else if (state.status === 'ERROR') {
-        Swal.fire({
-          icon: 'error',
-          title: 'Erreur de suppression',
-          text: `${state.value || 'Impossible de supprimer les utilisateurs'}`,
-          confirmButtonColor: '#ef4444',
-        });
-      }
-    });
-  }
+  //       Swal.fire({
+  //         icon: 'success',
+  //         title: 'Suppression réussie',
+  //         text: `${state.value}`,
+  //         confirmButtonColor: '#22c55e',
+  //       });
+  //       this.selectionService.clearSelection();
+  //     } else if (state.status === 'ERROR') {
+  //       Swal.fire({
+  //         icon: 'error',
+  //         title: 'Erreur de suppression',
+  //         text: `${state.value || 'Impossible de supprimer les utilisateurs'}`,
+  //         confirmButtonColor: '#ef4444',
+  //       });
+  //     }
+  //   });
+  // }
 
   // onStatusChange(value: Event) {
   //   const selectElement = value.target as HTMLSelectElement;
