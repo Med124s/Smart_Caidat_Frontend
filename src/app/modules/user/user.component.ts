@@ -35,7 +35,8 @@ export class UserComponent implements OnChanges {
         firstName: ['', Validators.required],
         lastName: ['', Validators.required],
         email: ['', [Validators.required, Validators.email]],
-        password: ['', [Validators.required, this.passwordRulesValidator]],
+        password: ['', [Validators.required]],
+        // password: ['', [Validators.required, this.passwordRulesValidator]],
         confirmPassword: ['', Validators.required],
         authorities: [["Agent d'autorité"], Validators.required],
         imageUrl: [''],
@@ -87,7 +88,9 @@ export class UserComponent implements OnChanges {
     };
   }
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['user'] && this.user) {
+    if (this.mode === 'create') {
+      this.userForm.reset();
+    } else if (changes['user'] && this.user) {
       this.userForm.patchValue({
         firstName: this.user.firstName || '',
         lastName: this.user.lastName || '',
@@ -95,7 +98,7 @@ export class UserComponent implements OnChanges {
         password: this.user.password || '',
         confirmPassword: this.user.confirmPassword || '',
         authorities: this.user.authorities || [],
-        // imageUrl: this.user.imageUrl || '',
+        imageUrl: this.user.imageUrl || '',
         publicId: this.user.publicId || '',
       });
       if (this.user.imageUrl) {
@@ -125,51 +128,15 @@ export class UserComponent implements OnChanges {
   }
 
   onSubmit() {
-    // console.log("SUBMIT");
-
-    // console.log(this.userForm.valid);
-
-    // console.log(this.user);
-
-    // if (this.userForm.valid) {
-    //   const userData = this.userForm.value;
-    //   let userSaved: RegisterUser = { ...userData };
-
-    //   console.log("_____ userSaved");
-
-    //   console.log(userSaved);
-
-    //   if (this.user) {
-    //     console.log('yes');
-    //     userSaved = {
-    //       ...userSaved,
-    //       publicId: this.user.publicId,
-    //       imageUrl: this.user.imageUrl,
-    //       //password: this.user.password,
-    //     };
-    //   }
-    //   if (this.user && this.mode==='edit') {
-    //     this.update.emit({ user: userSaved, file: this.selectedFile });
-    //   } else if (!this.user && this.mode === 'create') {
-    //     this.create.emit({ user: userSaved, file: this.selectedFile });
-    //   }
-    //   // this.resetForm();
-    //   this.cancel();
-    // } else {
-    //   console.log('Formulaire invalide !');
-    //   this.userForm.markAllAsTouched();
-    //   return;
-
     if (this.userForm.invalid) return;
-
     const formValue = this.userForm.value;
     const payload = { ...formValue, publicId: this.user?.publicId };
 
     let obs$: Observable<State<any>>;
     if (this.mode === 'create') {
-      obs$ = this.userService.saveUser(formValue);
+      obs$ = this.userService.create(formValue, this.selectedFile);
     } else {
-      obs$ = this.userService.updateUser(payload);
+      obs$ = this.userService.update(payload, this.selectedFile);
     }
 
     obs$.subscribe({
@@ -193,6 +160,9 @@ export class UserComponent implements OnChanges {
 
   cancel() {
     // this.resetForm();
+    if (this.mode === 'create') {
+      this.userForm.reset();
+    }
     this.close.emit();
   }
 

@@ -8,27 +8,33 @@
       <ng-container *ngIf="kpis$ | async as kpis">
         <div class="flex flex-col rounded-xl bg-white p-5 shadow-md">
           <div class="text-sm text-gray-500">Citoyens</div>
-          <div class="mt-2 text-3xl font-bold text-gray-800">{{ kpis.citizensCount }}</div>
-          <div class="mt-1 text-xs text-gray-400">Total des utilisateurs</div>
+          <!-- <div class="mt-2 text-3xl font-bold text-gray-800">{{ kpis.citizensCount }}</div> -->
+          <div class="mt-2 text-3xl font-bold text-gray-800">75</div>
+          <div class="mt-1 text-xs text-gray-400">Total des utilisateurs: <b>7</b></div>
         </div>
 
         <div class="flex flex-col rounded-xl bg-white p-5 shadow-md">
           <div class="text-sm text-gray-500">Demandes totales</div>
-          <div class="mt-2 text-3xl font-bold text-gray-800">{{ kpis.totalRequests }}</div>
+          <!-- <div class="mt-2 text-3xl font-bold text-gray-800">{{ kpis.totalRequests }}</div> -->
+          <div class="mt-2 text-3xl font-bold text-gray-800">6</div>
           <div class="mt-1 text-xs text-gray-400">
-            En attente : <span class="font-medium">{{ kpis.pendingRequests }}</span>
+            <!-- En attente : <span class="font-medium">{{ kpis.pendingRequests }}</span> -->
+            En attente : <span class="font-medium">2</span>
           </div>
         </div>
 
         <div class="flex flex-col rounded-xl bg-white p-5 shadow-md">
           <div class="text-sm text-gray-500">Documents archivés</div>
-          <div class="mt-2 text-3xl font-bold text-gray-800">{{ kpis.archivedDocuments }}</div>
+          <!-- <div class="mt-2 text-3xl font-bold text-gray-800">{{ kpis.archivedDocuments }}</div> -->
+          <div class="mt-2 text-3xl font-bold text-gray-800">65</div>
+          <div class="mt-1 text-xs text-gray-400"> Minio : <span class="font-medium">55.</span>
+           Local : <span class="font-medium">10</span></div>
         </div>
 
         <div class="flex flex-col rounded-xl bg-white p-5 shadow-md">
           <div class="text-sm text-gray-500">Réclamation total</div>
           <div class="mt-2 text-3xl font-bold text-gray-800">
-            {{ kpis.storageUsedBytes ?? 0 | number }}
+            {{ kpis.storageUsedBytes ?? 13 | number }}
           </div>
           <div class="mt-1 text-xs text-gray-400">En attente : 0</div>
         </div>

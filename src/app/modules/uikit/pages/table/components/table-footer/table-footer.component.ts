@@ -31,6 +31,23 @@ export class TableFooterComponent {
   onSizeChange(event: Event) {
     const target = event.target as HTMLSelectElement;
     const newSize = parseInt(target.value, 10);
+
+    console.log(newSize);
+    
     this.sizeChange.emit(newSize);
   }
+
+  // getStartIndex(): number {
+  //   return this.totalItems === 0 ? 0 : this.currentPage * this.size + 1;
+  // }
+
+  // getEndIndex(): number {
+  //   const end = (this.currentPage + 1) * this.size;
+  //   return end > this.totalItems ? this.totalItems : end;
+  // }
+  // onSizeChange(event: Event) {
+  //   const target = event.target as HTMLSelectElement;
+  //   const newSize = parseInt(target.value, 10);
+  //   this.sizeChange.emit(newSize);
+  // }
 }

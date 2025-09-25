@@ -42,15 +42,29 @@ export class SidebarMenuComponent implements OnInit {
     this.menuService.toggleMenu(subMenu);
   }
 
-  // ngOnInit() {
-  //   const state = this.oauth2Auth.fetchUser();
-  //   if (state.status === 'OK' && state.value) {
-  //     this.currentUser = state.value;
-  //     if (this.currentUser.authorities?.includes('ROLE_ADMIN')) {
-  //       this.loadPendingCount();
-  //     }
-  //   }
-  // }
+// get filteredMenu() {
+//   return this.menuService.pagesMenu
+//     .filter(menu => {
+//       // Exemple : نخفي مجموعة "Administration"
+//       if (menu.group === 'Administration') {
+//         return this.isAdmin;
+//       }
+//       return true; // نخلي المجموعات الأخرى
+//     })
+//     .map(menu => ({
+//       ...menu,
+//       items: menu.items.filter(item => {
+//         if (item.label === 'Utilisateur') {
+//           return this.isAdmin; // يخفي فقط عنصر "Utilisateur"
+//         }
+//         return true;
+//       })
+//     }));
+// }
+
+
+
+
   ngOnInit() {
     const state = this.oauth2Auth.fetchUser();
     if (state.status === 'OK' && state.value) {

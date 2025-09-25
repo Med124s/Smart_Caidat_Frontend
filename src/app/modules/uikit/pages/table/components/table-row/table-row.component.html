@@ -8,6 +8,7 @@
       [checked]="user.selected"
       />
   </td> -->
+
   <td class="text-center" (click)="toggleSelection($event)">
     <input
       class="checkbox checkbox-sm"
@@ -42,11 +43,15 @@
   <td>{{ user.email }}</td>
 
   <td class="space-x-1">
-    @for (role of user.authorities; track $index) {
+    @for (role of  user.authorities; track $index) {
     <span class="rounded-[30px] bg-yellow-500/10 px-2 py-0.5 text-xs font-medium text-yellow-800">
       {{ role.slice(5) }}
+      <!-- {{ role.slice(5) | json }} -->
+        <!-- {{ role}} -->
     </span>
+    <br>
     }
+    
   </td>
   <!-- <td>{{user.lastSeen}}</td> -->
   <td>{{ formatLastSeen(user.lastSeen) }}</td>

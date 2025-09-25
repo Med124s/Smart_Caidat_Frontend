@@ -38,24 +38,23 @@ import { Oauth2AuthService } from 'src/app/modules/auth/oauth2-auth.service';
 })
 export class ProfileMenuComponent {
   public isOpen = false;
-  private _router = inject(Router)
+  private _router = inject(Router);
   public profileMenu = [
     {
       title: 'Mon profil',
       icon: './assets/icons/heroicons/outline/user-circle.svg',
-      clickLink:()=> this.profile(),
-     
+      clickLink: () => this.profile(),
     },
     {
       title: 'Modifier le profil',
       icon: './assets/icons/heroicons/outline/cog-6-tooth.svg',
-      clickLink:()=> this.editProfile(),
+      clickLink: () => this.editProfile(),
     },
     {
       title: 'Se déconnecter',
       icon: './assets/icons/heroicons/outline/logout.svg',
       link: '',
-      clickLink:()=>this.logout()
+      clickLink: () => this.logout(),
     },
   ];
 
@@ -92,6 +91,7 @@ export class ProfileMenuComponent {
 
   public themeMode = ['light', 'dark'];
   public themeDirection = ['ltr', 'rtl'];
+  avatarPreview: string | ArrayBuffer | null = null;
 
   public themeService = inject(ThemeService);
   oauth2Service = inject(Oauth2AuthService);
@@ -105,16 +105,28 @@ export class ProfileMenuComponent {
   private listenToFetchUser() {
     effect(() => {
       const userState = this.oauth2Service.fetchUser();
-      if (userState.status === "OK"
-        && userState.value?.email
-        && userState.value.email !== this.oauth2Service.notConnected) {
+      if (
+        userState.status === 'OK' &&
+        userState.value?.email &&
+        userState.value.email !== this.oauth2Service.notConnected
+      ) {
         this.connectedUser = userState.value;
+
+        if (this.connectedUser.imageUrl) {
+          if (this.connectedUser.imageUrl.startsWith('/uploads/')) {
+            this.avatarPreview = 'http://localhost:8080' + this.connectedUser.imageUrl;
+          } else {
+            this.avatarPreview = this.connectedUser.imageUrl;
+          }
+        } else {
+          this.avatarPreview = `https://ui-avatars.com/api/?name=${this.connectedUser.firstName}&background=random`;
+        }
       }
     });
   }
 
-  profile():void{
-     this.oauth2Service.goToProfilePage();
+  profile(): void {
+    this.oauth2Service.goToProfilePage();
   }
   //   settings():void{
   //    this._router.navigate(['/settings']);
@@ -148,4 +160,14 @@ export class ProfileMenuComponent {
       return { ...theme, direction: value };
     });
   }
+
+  //   if (this.user.imageUrl) {
+  //   if (this.user.imageUrl.startsWith('/uploads/')) {
+  //     this.avatarPreview = 'http://localhost:8080' + this.user.imageUrl;
+  //   } else {
+  //     this.avatarPreview = this.user.imageUrl;
+  //   }
+  // } else {
+  //   this.avatarPreview = `https://ui-avatars.com/api/?name=${this.user.firstName}&background=random`;
+  // }
 }

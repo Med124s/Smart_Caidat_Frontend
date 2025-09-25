@@ -119,7 +119,7 @@ complaintsByCategoryOptions: ChartOptions<'pie'> = {
 
   /** Bar Chart – Réclamations par citoyen */
   complaintsByCitizen: ChartData<'bar'> = {
-    labels: ['Ahmed', 'Fatima', 'Mohamed', 'Khadija', 'Youssef'],
+    labels: ['Benyghil', 'El malki', 'Achraf', 'Taher', 'Ourmdane'],
     datasets: [
       {
         label: 'Réclamations',

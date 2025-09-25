@@ -178,24 +178,6 @@ export class ArchiveDocumentComponent implements OnInit, OnChanges {
       this.documents.removeAt(index);
     }
   }
-
-  // private patchDocuments(docs: any[]): void {
-  //   this.documents.clear();
-  //   docs.forEach((doc) => {
-  //     const docForm = this.fb.group({
-  //       id: [doc.id || null],
-  //       fileTitle: [doc.fileTitle || '', Validators.required],
-  //       fileName: [doc.fileName || '', Validators.required],
-  //       mimeType: [doc.mimeType || ''],
-  //       size: [doc.size || 0],
-  //       uploadDate: [doc.uploadDate || dayjs(new Date()).format('YYYY-MM-DDTHH:mm:ss')],
-  //     });
-
-  //     (docForm as any)._file = doc._file || null;
-  //     this.documents.push(docForm);
-  //   });
-  // }
-
   patchDocuments(docs: any[]) {
     const formArray = this.fb.array(
       docs.map((doc) =>
@@ -245,9 +227,9 @@ export class ArchiveDocumentComponent implements OnInit, OnChanges {
   }
 
   loadUsers() {
-    const query = { page: { page: 0, size: 10, sort: ['firstName,DESC'] }, query: '' };
-    this.users$ = this.userService.searchResult.pipe(map((state) => state.value?.users ?? []));
-    this.userService.search(query);
+    // const query = { page: { page: 0, size: 10, sort: ['firstName,DESC'] }, query: '' };
+    // this.users$ = this.userService.searchResult.pipe(map((state) => state.value?.users ?? []));
+    // this.userService.search(query);
   }
 
   loadCitizens() {

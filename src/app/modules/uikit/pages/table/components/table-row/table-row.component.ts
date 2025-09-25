@@ -5,15 +5,16 @@ import { RegisterUser } from 'src/app/shared/models/user.model';
 import { UserSearchService } from '../../services/user-search.service';
 import { UserSelectionService } from '../../services/user-selection.service';
 import dayjs from 'dayjs';
+import { JsonPipe } from '@angular/common';
 
 @Component({
   selector: '[app-table-row]',
-  imports: [FormsModule, AngularSvgIconModule],
+  imports: [FormsModule, AngularSvgIconModule, JsonPipe],
   templateUrl: './table-row.component.html',
   styleUrl: './table-row.component.css',
 })
 export class TableRowComponent implements OnChanges {
-  @Input() user: RegisterUser = {};
+  @Input() user: RegisterUser | any = {};
   @Input() userIds: string[] = [];
   @Output() detailUser = new EventEmitter<any>();
   @Output() onUpdateUser = new EventEmitter<any>();
@@ -65,6 +66,8 @@ export class TableRowComponent implements OnChanges {
     if (!value) return '';
     return dayjs(value).format('DD/MM/YYYY HH:mm');
   }
+
+
 
   showUser(user: any) {
     console.log('______________show user');

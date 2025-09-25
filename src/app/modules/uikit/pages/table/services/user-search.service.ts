@@ -1,10 +1,10 @@
+import { Pagination } from './../../../../../shared/models/request.model';
+import { SearchResponse } from './../../../../complaint/model/complaint-search';
 import { inject, Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
-import { catchError, debounce, distinctUntilChanged, map, Observable, of, Subject, switchMap, timer } from 'rxjs';
-import { SearchQuery, SearchResponse } from '../model/user-search.model';
+import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
+import { catchError, map, Observable, of, startWith } from 'rxjs';
 import { State } from 'src/app/shared/models/state.model';
-import {  RegisterUser } from 'src/app/shared/models/user.model';
-import { createPaginationOption } from 'src/app/shared/models/request.model';
+import { RegisterUser } from 'src/app/shared/models/user.model';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -145,43 +145,147 @@ export class UserSearchService {
   //     });
   // }
 
+  // http = inject(HttpClient);
 
-    http = inject(HttpClient);
+  // private searchQuery$ = new Subject<SearchQuery>();
+  // private searchResult$ = new Subject<State<SearchResponse>>();
+  // searchResult = this.searchResult$.asObservable();
 
-  private searchQuery$ = new Subject<SearchQuery>();
-  private searchResult$ = new Subject<State<SearchResponse>>();
-  searchResult = this.searchResult$.asObservable();
+  // constructor() {
+  //   this.listenToSearch();
+  // }
 
-  constructor() {
-    this.listenToSearch();
+  // private listenToSearch(): void {
+  //   this.searchQuery$
+  //     .pipe(
+  //       distinctUntilChanged(),
+  //       debounce(() => timer(300)),
+  //       switchMap((query) =>
+  //         this.fetchResult(query).pipe(
+  //           map((res) => State.Builder<SearchResponse>().forSuccess(res)),
+  //           catchError((err) => of(State.Builder<SearchResponse>().forError(err))),
+  //         ),
+  //       ),
+  //     )
+  //     .subscribe((state) => this.searchResult$.next(state));
+  // }
+
+  // private fetchResult(searchQuery: SearchQuery): Observable<SearchResponse> {
+  //   let params = createPaginationOption(searchQuery.page);
+  //   params = params.set('query', searchQuery.query);
+  //   return this.http.get<SearchResponse>(`${environment.API_URL}/users/search`, { params });
+  // }
+
+  // search(searchQuery: SearchQuery): void {
+  //   this.searchQuery$.next(searchQuery);
+  // }
+
+  // saveUser(user: RegisterUser, file?: File): Observable<State<RegisterUser>> {
+  //   const formData = new FormData();
+  //   formData.append(
+  //     'user',
+  //     JSON.stringify({
+  //       publicId: user.publicId,
+  //       firstName: user.firstName,
+  //       lastName: user.lastName,
+  //       email: user.email,
+  //       authorities: user.authorities,
+  //       password: user.password,
+  //     }),
+  //   );
+  //   if (file) {
+  //     formData.append('imageUrl', file);
+  //   }
+
+  //   return this.http.post<{ user: RegisterUser }>(`${environment.API_URL}/users/register`, formData).pipe(
+  //     map((res) => {
+  //       const mapped = this.mapToRegisterUser(res.user);
+  //       return State.Builder<RegisterUser>().forSuccess(mapped);
+  //     }),
+  //     catchError((err: HttpErrorResponse) => of(State.Builder<RegisterUser>().forError(err))),
+  //   );
+  // }
+
+  // updateUser(user: RegisterUser, file?: File): Observable<State<RegisterUser>> {
+  //   const formData = new FormData();
+  //   formData.append(
+  //     'user',
+  //     JSON.stringify({
+  //       publicId: user.publicId,
+  //       firstName: user.firstName,
+  //       lastName: user.lastName,
+  //       email: user.email,
+  //       authorities: user.authorities,
+  //       imageUrl: user.imageUrl,
+  //       password: user.password,
+  //     }),
+  //   );
+  //   if (file) {
+  //     formData.append('imageUrl', file);
+  //   }
+
+  //   return this.http.patch<RegisterUser>(`${environment.API_URL}/users/update`, formData).pipe(
+  //     map((res) => State.Builder<RegisterUser>().forSuccess(res)),
+  //     catchError((err: HttpErrorResponse) => of(State.Builder<RegisterUser>().forError(err))),
+  //   );
+  // }
+
+  // private mapToRegisterUser(raw: any): RegisterUser {
+  //   if (!raw) return {} as RegisterUser;
+
+  //   return {
+  //     publicId: raw.userPublicId?.value || '',
+  //     firstName: raw.firstname?.value || '',
+  //     lastName: raw.lastName?.value || '',
+  //     email: raw.email?.value || '',
+  //     password: raw.password?.value || '',
+  //     imageUrl: raw.imageUrl?.value || '',
+  //     authorities: raw.authorities || [],
+  //     lastSeen: raw.lastSeen || null,
+  //   };
+  // }
+
+  // deleteUsersBulk(publicIds: string[]): Observable<State<string[]>> {
+  //   return this.http
+  //     .request<string[]>('delete', `${environment.API_URL}/users/bulk`, {
+  //       body: publicIds,
+  //       headers: new HttpHeaders({
+  //         'Content-Type': 'application/json',
+  //       }),
+  //     })
+  //     .pipe(
+  //       map((res) => State.Builder<string[]>().forSuccess(res)),
+  //       catchError((err: HttpErrorResponse) => of(State.Builder<string[]>().forError(err))),
+  //     );
+  // }
+
+  private http = inject(HttpClient);
+
+  // search(query: string, pagination: Pagination): Observable<State<SearchResponse<Complaint>>> {
+  //   const params = new HttpParams()
+  //     .set('keyword', query)
+  //     .set('page', pagination.page.toString())
+  //     .set('size', pagination.size.toString())
+  //     .set('sort', pagination.sort.join(','));
+
+  /** 🔹 Rechercher les utilisateurs avec pagination */
+  search(query: string, pagination: Pagination): Observable<State<SearchResponse<RegisterUser>>> {
+    // const params = new HttpParams().set('query', query).set('page', page.toString()).set('size', size.toString());
+    const params = new HttpParams()
+      .set('keyword', query)
+      .set('page', pagination.page.toString())
+      .set('size', pagination.size.toString())
+      .set('sort', pagination.sort.join(','));
+
+    return this.http.get<SearchResponse<RegisterUser>>(`${environment.API_URL}/users/search`, { params }).pipe(
+      map((res: any) => State.Builder<SearchResponse<RegisterUser>>().forSuccess(res)),
+      startWith(State.Builder<SearchResponse<RegisterUser>>().forInit()),
+      catchError((err) => of(State.Builder<SearchResponse<RegisterUser>>().forError(err))),
+    );
   }
 
-  private listenToSearch(): void {
-    this.searchQuery$
-      .pipe(
-        distinctUntilChanged(),
-        debounce(() => timer(300)),
-        switchMap((query) =>
-          this.fetchResult(query).pipe(
-            map((res) => State.Builder<SearchResponse>().forSuccess(res)),
-            catchError((err) => of(State.Builder<SearchResponse>().forError(err))),
-          ),
-        ),
-      )
-      .subscribe((state) => this.searchResult$.next(state));
-  }
-
-  private fetchResult(searchQuery: SearchQuery): Observable<SearchResponse> {
-    let params = createPaginationOption(searchQuery.page);
-    params = params.set('query', searchQuery.query);
-    return this.http.get<SearchResponse>(`${environment.API_URL}/users/search`, { params });
-  }
-
-  search(searchQuery: SearchQuery): void {
-    this.searchQuery$.next(searchQuery);
-  }
-
-  saveUser(user: RegisterUser, file?: File): Observable<State<RegisterUser>> {
+  /** 🔹 Créer un nouvel utilisateur */
+  create(user: RegisterUser, file?: File): Observable<State<RegisterUser>> {
     const formData = new FormData();
     formData.append(
       'user',
@@ -198,16 +302,43 @@ export class UserSearchService {
       formData.append('imageUrl', file);
     }
 
-    return this.http.post<{ user: RegisterUser }>(
-      `${environment.API_URL}/users/register`,
-      formData
-    ).pipe(
-      map((res) => State.Builder<RegisterUser>().forSuccess(res.user)),
-      catchError((err: HttpErrorResponse) => of(State.Builder<RegisterUser>().forError(err)))
+    return this.http.post<RegisterUser>(`${environment.API_URL}/users/register`, formData).pipe(
+      map((res: any) => State.Builder<RegisterUser>().forSuccess(this.mapToRegisterUser(res.user))),
+      startWith(State.Builder<RegisterUser>().forInit()),
+      catchError((err: HttpErrorResponse) => of(State.Builder<RegisterUser>().forError(err))),
     );
   }
 
-  updateUser(user: RegisterUser, file?: File): Observable<State<RegisterUser>> {
+  private mapToRegisterUser(raw: any): RegisterUser {
+    if (!raw) return {} as RegisterUser;
+
+    if (Array.isArray(raw.authorities)) {
+      raw.authorities = raw.authorities.map(
+        (auth: any) =>
+          typeof auth === 'string'
+            ? auth // déjà bon
+            : auth?.name?.name, // cas { name: { name: 'ROLE_XXX' } }
+      );
+    }
+
+    return {
+      publicId: raw.userPublicId?.value || '',
+      firstName: raw.firstname?.value || '',
+      lastName: raw.lastName?.value || '',
+      email: raw.email?.value || '',
+      password: raw.password?.value || '',
+      imageUrl: raw.imageUrl?.value || '',
+      authorities: raw.authorities || [],
+      lastSeen: raw.lastSeen || null,
+    };
+  }
+
+  /** 🔹 Mettre à jour un utilisateur */
+  update(user: RegisterUser, file?: File): Observable<State<RegisterUser>> {
+    console.log('....... FILE ......');
+
+    console.log(file);
+
     const formData = new FormData();
     formData.append(
       'user',
@@ -217,34 +348,35 @@ export class UserSearchService {
         lastName: user.lastName,
         email: user.email,
         authorities: user.authorities,
+        password: user.password,
         imageUrl: user.imageUrl,
-        password: user.password,
       }),
     );
     if (file) {
       formData.append('imageUrl', file);
     }
 
-    return this.http.patch<RegisterUser>(
-      `${environment.API_URL}/users/update`,
-      formData
-    ).pipe(
-      map((res) => State.Builder<RegisterUser>().forSuccess(res)),
-      catchError((err: HttpErrorResponse) => of(State.Builder<RegisterUser>().forError(err)))
+    return this.http.patch<RegisterUser>(`${environment.API_URL}/users/update`, formData).pipe(
+      map((res: any) => {
+        console.log(res);
+        return State.Builder<RegisterUser>().forSuccess(res.user);
+      }),
+      startWith(State.Builder<RegisterUser>().forInit()),
+      catchError((err: HttpErrorResponse) => of(State.Builder<RegisterUser>().forError(err))),
     );
   }
 
+  /** 🔹 Supprimer plusieurs utilisateurs */
   deleteUsersBulk(publicIds: string[]): Observable<State<string[]>> {
     return this.http
       .request<string[]>('delete', `${environment.API_URL}/users/bulk`, {
         body: publicIds,
-        headers: new HttpHeaders({
-          'Content-Type': 'application/json',
-        }),
+        headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
       })
       .pipe(
         map((res) => State.Builder<string[]>().forSuccess(res)),
-        catchError((err: HttpErrorResponse) => of(State.Builder<string[]>().forError(err)))
+        startWith(State.Builder<string[]>().forInit()),
+        catchError((err: HttpErrorResponse) => of(State.Builder<string[]>().forError(err))),
       );
   }
 }

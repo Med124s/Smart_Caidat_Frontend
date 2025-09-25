@@ -1,78 +1,86 @@
 <div class="mb-4 flex justify-between">
   <div class="inline-block">
-    <h3 class="text-foreground font-semibold">Team Members</h3>
+    <h3 class="text-foreground font-semibold">Membres</h3>
     <div class="text-muted-foreground space-x-1 text-xs font-medium">
-      <a href="" class="hover:text-primary">Tous les utilisateurs:</a>
-      <span class="text-foreground">49,053</span>
+      <span>Tous les utilisateurs:</span>
+      <span class="text-foreground">{{ totalItems() }}</span>
     </div>
   </div>
+
   <div class="inline-block space-x-4">
     <button
-      class="bg-muted text-muted-foreground hover:text-foreground flex-none rounded-md px-4 py-2.5 text-xs font-semibold">
-      Import CSV
-    </button>
-    <button
-      (click)="createUser()"
+      (click)="showCreateModal()"
       class="bg-primary text-primary-foreground flex-none rounded-md px-4 py-2.5 text-xs font-semibold">
-      Ajouter utilisateurs
+      Ajouter utilisateur
     </button>
-
-    <!-- <app-user [visible]="showModalCreate" (close)="showModalCreate = false" (create)="addUser($event)"></app-user> -->
-
-    <!-- <app-user [user]=userUpdate [visibleUpdate]="showModalUpdate" (close)="showModalUpdate = false"
-      (update)="updateUser($event)"></app-user> -->
 
     <app-user
       [hidden]="!showModal"
       [user]="selectedUser()"
       [mode]="modalMode"
       (save)="saveUser($event)"
-      (close)="showModal = false" 
-      >
+      (close)="showModal = false">
     </app-user>
   </div>
 </div>
 
-
-
 <div class="border-muted/20 bg-background flex min-w-full flex-col rounded-xl border p-2">
-  <app-table-action [usersResults]="usersResults" [updateUsersResults]="updateUsersResults"></app-table-action>
+  <!-- <app-table-action
+    [usersResults]="filteredUsers"
+    [updateUsersResults]="updateUsersResults">
+    
+  </app-table-action> -->
+  <app-table-action
+    [selectedIds]="selectedIds()"
+    [selectedUser]="selectedUsers"
+    (filter)="onFilter($event)"
+    (deleteSelected)="onDeleteSelected($event)"
+    [totalItems] = "totalItems()"
+    [size] = "this.searchPage.size"
+    
+    >
+  </app-table-action>
+
   <div
     class="scrollbar-thumb-rounded scrollbar-track-rounded scrollbar-thin scrollbar-track-transparent scrollbar-thumb-muted grow overflow-x-auto px-5">
     <table
       class="text-muted-foreground table w-full table-auto border-collapse border-0 text-left align-middle leading-5">
       <thead class="border-muted/20 text-muted-foreground border text-xs">
-        <tr app-table-header [userIds]="visibleUserIds" (onCheck)="toggleUsers($event)"></tr>
-        <!-- <tr app-table-header></tr> -->
+        <!-- <tr
+          app-table-header
+          [userIds]="visibleUserIds()"
+          (onCheck)="toggleUsers($event)">
+        </tr> -->
+        <tr app-table-header [userIds]="visibleUserIds()"></tr>
       </thead>
+
       <tbody>
-        @for (user of filteredUsers(); track $index) {
-        <!-- <tr class="hover:bg-card/50" app-table-row [user]="user" (click)="detailUser(user)"></tr> -->
+        @for (user of visibleUsers() || []; track $index) {
         <tr
           class="hover:bg-card/50"
           app-table-row
           [user]="user"
           (onDeleteSelected)="onDeleteSelected($event)"
           (detailUser)="detailUser($event)"
-          (onUpdateUser)="onUpdateUser($event)"
-          >
-        </tr>
+          (onUpdateUser)="onUpdateUser($event)"></tr>
         } @empty {
+
         <tr>
-          <td class="py-4 text-center text-sm" colspan="7">No users found</td>
+          <td class="py-4 text-center text-sm" colspan="7">Aucun utilisateur trouvé</td>
         </tr>
+
         }
       </tbody>
     </table>
-    @if (loadingSearch()) {
-    <div class="py-4 text-center">
+
+    <div *ngIf="loadingSearch()" class="py-4 text-center">
       <div class="inline-flex items-center gap-2">
         <div class="h-5 w-5 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
         <span class="text-gray-600">Chargement...</span>
       </div>
     </div>
-    }
   </div>
+
   <app-table-footer
     [currentPage]="searchPage.page"
     [totalPages]="totalPages()"
