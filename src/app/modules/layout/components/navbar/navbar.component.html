@@ -1,6 +1,6 @@
-<div class="bg-background relative">
+<div class="bg-background relative py-1">
   <div class="mx-auto px-5">
-    <div class="flex items-center justify-between py-3.5 md:justify-start">
+    <div class="flex items-center justify-between md:justify-start">
       <!-- Mobile Navigation Menu Button-->
       <div class="sm:order-1 md:hidden">
         <button
@@ -15,11 +15,14 @@
       </div>
 
       <!-- Logo -->
-      <div class="flex items-center justify-start gap-3 sm:order-2 ltr:md:mr-10 rtl:md:ml-10 lg:hidden">
-        <a class="bg-primary flex items-center justify-center rounded-sm p-2 focus:outline-hidden focus:ring-1">
-          <svg-icon src="assets/icons/logo.svg"></svg-icon>
+      <div class="flex items-center justify-start gap-1 sm:order-2 ltr:md:mr-10 rtl:md:ml-10">
+        <a class="flex items-center justify-center rounded-sm p-2 focus:outline-hidden focus:ring-1">
+          <img src="assets/images/logo.png" alt="logo" class="w-9" />
         </a>
-        <b class="text-foreground hidden text-sm font-bold sm:block"> Angular Tailwind </b>
+        <b class="text-foreground hidden text-xs font-bold sm:block"
+          >Royaume du Maroc<br />
+          Ministére de l'intérieur
+        </b>
       </div>
 
       <!-- Desktop Menu -->
@@ -29,6 +32,12 @@
 
       <!-- Profile menu -->
       <div class="items-center justify-end sm:order-4 md:flex md:flex-1 lg:w-0">
+        <div class="relative  mr-7 hidden md:block">
+          <div class="flex items-center gap-2">
+            <svg-icon src="assets/icons/map-tag-svgrepo-com.svg"></svg-icon>
+            <span class="text-xs italic text-foreground">Provice Tan-Tan <br>Caidat Msied</span>
+          </div>
+        </div>
         <app-profile-menu></app-profile-menu>
       </div>
     </div>

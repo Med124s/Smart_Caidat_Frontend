@@ -1,23 +1,27 @@
 <div class="flex flex-wrap items-center justify-between gap-2 py-3 px-5">
   <h3 class="text-muted-foreground text-sm font-medium">
-    Affichage de {{ size === 0 ? 1 : size }} sur {{ totalItems }} documents
+    Affichage de {{ size === 0 ? 1 : size }} sur {{ totalItems }} demandes
   </h3>
 
   <div class="flex flex-wrap gap-2">
-    <!-- Filtre date -->
-    <div class="flex gap-4">
-      <label class="text-muted-foreground mb-1 flex items-center gap-2 text-xs">
-        <span>Date début :</span>
-        <input type="date" [value]="filters.startDate" (change)="onStartDateChange($event)" class="input" />
-      </label>
 
-      <label class="text-muted-foreground mb-1 flex items-center gap-2 text-xs">
-        <span>Date fin :</span>
-        <input type="date" [value]="filters.endDate" (change)="onEndDateChange($event)" class="input" />
-      </label>
+    <!-- Filtre par type -->
+    <div>
+      <select class="rounded-md border px-3 py-2 text-sm" [value]="filters.type" (change)="onTypeChange($event)">
+        <option value="">-- Tous les types --</option>
+        <option *ngFor="let t of requestTypes" [value]="t.value">{{ t.label }}</option>
+      </select>
     </div>
 
-    <!-- Filtre texte -->
+    <!-- Filtre par statut -->
+    <div>
+      <select class="rounded-md border px-3 py-2 text-sm" [value]="filters.status" (change)="onStatusChange($event)">
+        <option value="">-- Tous les statuts --</option>
+        <option *ngFor="let s of statuses" [value]="s.value">{{ s.label }}</option>
+      </select>
+    </div>
+
+        <!-- Filtre texte -->
     <div class="flex">
       <label class="text-muted-foreground relative">
         <div class="absolute left-2.5 top-2.5">
@@ -28,28 +32,9 @@
           class="py-2 pl-8 pr-2"
           placeholder="Rechercher demande"
           type="text"
-          [value]="filters.title"
           (input)="onSearchChange($event)" />
       </label>
     </div>
-
-    <!-- Filtre date -->
-    <!-- <div class="flex gap-2">
-      <input
-        type="date"
-        [value]="filters.startDate"
-        (change)="onStartDateChange($event)"
-        class="input"
-        placeholder="Date début"
-      />
-      <input
-        type="date"
-        [value]="filters.endDate"
-        (change)="onEndDateChange($event)"
-        class="input"
-        placeholder="Date fin"
-      />
-    </div> -->
 
     <button
       (click)="deleteSelectedRequests()"

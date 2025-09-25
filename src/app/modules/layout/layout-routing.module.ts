@@ -33,6 +33,42 @@ const routes: Routes = [
     loadChildren: () => import('../documents_managements/request/request_documents.module').then((m) => m.RequestModule),
     //canActivate:[adminGuard]
   },
+  {
+    path: 'reclamations',
+    component: LayoutComponent,
+    loadChildren: () => import('../complaint/complaints.module').then((m) => m.ComplaintsModule),
+    //canActivate:[adminGuard]
+  },
+    {
+    path: 'correspondances',
+    component: LayoutComponent,
+    loadChildren: () => import('../correspondance/correspondance.module').then((m) => m.CorrespondanceModule),
+    //canActivate:[adminGuard]
+  }, 
+  {
+    path: 'type-correspondances',
+    component: LayoutComponent,
+    loadChildren: () => import('../correspondance-type/type-correspondance.module').then((m) => m.TypeCorrespondanceModule),
+    //canActivate:[adminGuard]
+  },
+  {
+    path: 'tasks',
+    component: LayoutComponent,
+    loadChildren: () => import('../Task/task.module').then((m) => m.TaskModule),
+    //canActivate:[adminGuard]
+  }, 
+  {
+    path: 'meetings',
+    component: LayoutComponent,
+    loadChildren: () => import('../meeting/meeting.module').then((m) => m.MeetingModule),
+    //canActivate:[adminGuard]
+  },
+  {
+    path: 'salles',
+    component: LayoutComponent,
+    loadChildren: () => import('../salle/salle.module').then((m) => m.SalleModule),
+    //canActivate:[adminGuard]
+  },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: '**', redirectTo: 'error/404' },
 ];

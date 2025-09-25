@@ -1,0 +1,96 @@
+        <div class="flex flex-col rounded-xl bg-white p-5 shadow-md">
+          <div class="text-xs text-gray-500 text-end">{{currentMeeting?.dateMeeting | date: 'yyyy-MM-dd à HH:mm'}}</div>
+          <div class="mt-2 text-sm">
+            {{currentMeeting?.subject}}
+          </div>
+          <div class="mt-1 text-xs text-gray-400">{{currentMeeting?.description}}</div>
+          <div class="text-xs text-gray-500 text-end mt-4">
+            <span (click)="deleteSelectedMeetings()" class="badge badge_action rounded-pill text-bg-danger mx-2"><i class="fa-solid fa-trash mx-1 my-1"></i></span>
+            <span (click)="toUpdate()" class="badge badge_action rounded-pill text-bg-primary mx-2"><i class="fa-solid fa-pencil mx-1 my-1"></i></span>
+            <span (click)="openModalView()" class="badge badge_action rounded-pill text-bg-success mx-2"><i class="fa-regular fa-eye mx-1 my-1"></i></span>
+          </div>
+        </div>
+
+<div *ngIf="visibleView" class="fixed inset-0 flex items-center justify-center bg-foreground z-50 opacity-95">
+  <div class="bg-card text-white p-6 rounded-lg w-full max-w-2xl">
+    <h2 class="text-xl text-foreground font-semibold mb-4">
+      Réunion : {{currentMeeting?.subject}}
+    </h2>
+        <div class="space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="subject" class="block text-xs text-muted-foreground mb-1">Identifiant </label>
+              <div class="text-black text-sm mt-1">
+                  {{currentMeeting?.publicId}}
+              </div>
+            </div>
+            <div>
+                <label for="typeId" class="block text-xs text-muted-foreground mb-1">Titre</label>
+                <div class="text-black text-sm mt-1">
+                    {{currentMeeting?.subject}}
+                </div>
+            </div>
+          </div>
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="dateReception" class="block text-xs text-muted-foreground mb-1">Date</label>
+              <div class="text-black text-sm mt-1">
+                  {{currentMeeting?.dateMeeting | date: 'yyyy-MM-dd à HH:mm:ss' }}
+              </div>
+            </div>
+            <div>
+              <label for="dateReception" class="block text-xs text-muted-foreground mb-1">Emplacement</label>
+              <div class="text-black text-sm mt-1">
+                  {{currentMeeting?.salle?.title }} ~ {{currentMeeting?.salle?.emplacement }}
+              </div>
+            </div>
+        </div>
+            <div>
+              <label for="description" class="block text-xs text-muted-foreground mb-1">Description</label>
+              <div class="text-black text-sm mt-1">
+                  {{currentMeeting?.description }}
+              </div>
+            </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="dateReception" class="block text-xs text-muted-foreground mb-1">Date Création</label>
+              <div class="text-black text-sm mt-1">
+                  {{currentMeeting?.createdDate | date: 'yyyy-MM-dd à HH:mm:ss' }}
+              </div>
+            </div>
+            <div>
+            <label for="description" class="block text-xs text-muted-foreground mb-1">Crée par</label>
+              <div class="text-black text-sm mt-1">
+                  Mohamed BEN-YGHIL
+              </div>
+            </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="dateReception" class="block text-xs text-muted-foreground mb-1">Modifié le</label>
+              <div class="text-black text-sm mt-1">
+                  {{currentMeeting?.lastModifiedDate | date: 'yyyy-MM-dd à HH:mm:ss' }}
+              </div>
+            </div>
+            <div>
+            <label for="description" class="block text-xs text-muted-foreground mb-1">Modifié par</label>
+              <div class="text-black text-sm mt-1">
+                  L. ABDERRAHIM
+              </div>
+            </div>
+        </div>
+        <div>
+              <label for="dateReception" class="block text-xs text-muted-foreground mb-1">Participants : </label>
+              @for (part of currentMeeting?.participants; track part) {
+              <div class="text-black text-sm mt-1"> {{part.firstName + ' ' + part.lastName + '(' + part.email +')'}} </div>
+              }
+        </div>
+        <div class="flex justify-end gap-2 mt-4">
+            <button type="button" (click)="cancel()" class="hover:bg-primary-600 bg-red-500 text-primary-foreground rounded-md px-4 py-2.5 text-xs font-semibold cursor-pointer">
+              Fermer
+            </button>
+        </div>
+        </div>
+  </div>
+</div>

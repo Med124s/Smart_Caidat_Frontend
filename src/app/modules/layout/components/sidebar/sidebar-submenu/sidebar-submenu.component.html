@@ -20,12 +20,14 @@
             class="hover:bg-card inline-block w-full rounded-lg px-4 py-2 text-xs">
             {{ sub.label }}
             <!-- Badge notification -->
+            @if (pendingCount > 0 && sub.label === 'Demandes de documents' && isAdmin) {
             <span
-              *ngIf="pendingCount > 0 && sub.label === 'Demandes de documents'"
               class="absolute top-2 right-5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[0.6rem] font-bold text-white">
               {{ pendingCount }}
             </span>
+            } 
           </a>
+
           @if(menuService.isActive(sub.route)){
           <span
             class="size-1.5 bg-primary absolute flex translate-y-3.5 items-center rounded-full ltr:-translate-x-[11.5px] rtl:translate-x-[11.5px]">

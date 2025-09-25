@@ -29,16 +29,16 @@ export class RequestService {
     );
   }
 
-  create(request: RequestDocument): Observable<State<RequestDocument>> {
-    return this.http.post<RequestDocument>(`${environment.API_URL}/requests/register`, request).pipe(
+  create(formData: FormData): Observable<State<RequestDocument>> {
+    return this.http.post<RequestDocument>(`${environment.API_URL}/requests/register`, formData).pipe(
       map((res) => State.Builder<RequestDocument>().forSuccess(res)),
       startWith(State.Builder<RequestDocument>().forInit()),
       catchError((err) => of(State.Builder<RequestDocument>().forError(err))),
     );
   }
 
-  update(request: RequestDocument): Observable<State<RequestDocument>> {
-    return this.http.patch<RequestDocument>(`${environment.API_URL}/requests/update`, request).pipe(
+  update(formData: FormData): Observable<State<RequestDocument>> {
+    return this.http.patch<RequestDocument>(`${environment.API_URL}/requests/update`, formData).pipe(
       map((res) => State.Builder<RequestDocument>().forSuccess(res)),
       startWith(State.Builder<RequestDocument>().forInit()),
       catchError((err) => of(State.Builder<RequestDocument>().forError(err))),
@@ -46,29 +46,48 @@ export class RequestService {
   }
 
   delete(ids: string[]): Observable<State<string[]>> {
-    return this.http.delete<string[]>(`${environment.API_URL}/requests/delete`).pipe(
-      map((res: string[]) => State.Builder<string[]>().forSuccess(res)),
-      startWith(State.Builder<string[]>().forInit()),
-      catchError((err) => of(State.Builder<any>().forError(err))),
-    );
+    return this.http
+      .delete<string[]>(`${environment.API_URL}/requests/bulk`, { body: ids }) // ✅ passer le body ici
+      .pipe(
+        map((res: string[]) => State.Builder<string[]>().forSuccess(res)),
+        startWith(State.Builder<string[]>().forInit()),
+        catchError((err) => of(State.Builder<any>().forError(err))),
+      );
   }
 
   approveRequest(id: number) {
     return this.http.post(`${environment.API_URL}/requests/${id}/approve`, {}, { responseType: 'blob' });
   }
 
-  uploadCertificate(requestId: string, file: Blob) {
-    const formData = new FormData();
-    formData.append('file', file, `certificat_${requestId}.pdf`);
-    return this.http.post(`${environment.API_URL}/requests/${requestId}/certificate`, formData);
-  }
-  
+  // uploadCertificate(requestId: string, file: Blob) {
+  //   const formData = new FormData();
+  //   formData.append('file', file, `certificat_${requestId}.pdf`);
+  //   return this.http.post(`${environment.API_URL}/requests/${requestId}/certificate`, formData);
+  // }
+
   createWithFile(formData: FormData): Observable<State<RequestDocument>> {
-    return this.http.post<State<RequestDocument>>(`${environment.API_URL}/requests`, formData);
+    return this.http.post<State<RequestDocument>>(`${environment.API_URL}/requests/register`, formData);
   }
 
   updateWithFile(formData: FormData): Observable<State<RequestDocument>> {
-    return this.http.put<State<RequestDocument>>(`${environment.API_URL}/requests`, formData);
+    return this.http.put<State<RequestDocument>>(`${environment.API_URL}/requests/register`, formData);
+  }
+
+  updateRequestWithFile(requestId: string, file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('clearDocument', 'false');
+
+    return this.http.put(`${environment.API_URL}/requests/${requestId}/document`, formData);
+  }
+
+  /**
+   * Clear (remove) documentUrl only
+   */
+  clearRequestDocument(requestId: string) {
+    const formData = new FormData();
+    formData.append('clearDocument', 'true');
+    return this.http.put(`${environment.API_URL}/requests/${requestId}/document`, formData);
   }
 
   //   updateStatus(
@@ -105,6 +124,18 @@ export class RequestService {
       }),
       startWith(State.Builder<RequestDocument>().forInit()),
       catchError((err) => of(State.Builder<RequestDocument>().forError(err))),
+    );
+  }
+
+  // request-docs.service.ts
+  generateLifeCertificate(requestId: string, validatorId?: string) {
+    const params: any = {};
+    if (validatorId) params.validatorId = validatorId;
+
+    return this.http.post<{ documentUrl: string; status: string; validationDate: string }>(
+      `${environment.API_URL}/requests/${requestId}/certificate/generate`,
+      null,
+      { params },
     );
   }
 }

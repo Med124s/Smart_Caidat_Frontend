@@ -16,7 +16,9 @@
     </button> -->
 
     <!-- Ajouter -->
-    <button class="bg-primary text-primary-foreground rounded-md px-3 py-2 text-xs font-semibold" (click)="showCreateModal()">
+    <button
+      class="bg-primary text-primary-foreground rounded-md px-3 py-2 text-xs font-semibold"
+      (click)="showCreateModal()">
       + Ajouter Demande
     </button>
   </div>
@@ -43,14 +45,12 @@
     (deleteSelected)="onDeleteSelected($event)">
   </app-archive-table-action> -->
 
-<app-request-table-action
-  [selectedIds]="selectedIds()"
-  [selectedRequests]="selectedRequests"
-  (search)="onSearch($event)"
-  (startDateChange)="onStartDateChange($event)"
-  (endDateChange)="onEndDateChange($event)"
-  (deleteSelected)="onDeleteSelected($event)">
-</app-request-table-action>
+  <app-request-table-action
+    [selectedIds]="selectedIds()"
+    [selectedRequests]="selectedRequests"
+    (filter)="onFilter($event)"
+    (deleteSelected)="onDeleteSelected($event)">
+  </app-request-table-action>
   <!-- Table -->
   <div
     class="scrollbar-thumb-rounded scrollbar-track-rounded scrollbar-thin scrollbar-track-transparent scrollbar-thumb-muted grow overflow-x-auto px-5">
@@ -58,13 +58,13 @@
       class="text-muted-foreground table w-full table-auto border-collapse border-0 text-left align-middle leading-5">
       <thead class="border-muted/20 text-muted-foreground border text-xs">
         <!-- <tr app-archive-table-header  (onCheck)="toggleAllSelection($event)"></tr> -->
-        <!-- <tr app-request-table-header [requestIds]="visibleRequestIds"></tr> -->
-        <tr app-request-table-header ></tr>
+        <tr app-request-table-header [requestIds]="visibleIds"></tr>
+        <!-- <tr app-request-table-header></tr> -->
       </thead>
 
       <!-- Rows -->
       <tbody>
-        @for (request of visibleRequests || []; track $index) {
+        @for (request of visibleRequests() || []; track $index) {
         <!-- <tr
           class="hover:bg-card/50"
           app-request-table-row
@@ -72,13 +72,14 @@
           [selectedRequests]="selectedRequests"
           (onDeleteSelected)="onDeleteSelected($event)"
           (detailRequest)="detailRequest($event)"></tr> -->
-               <tr
+        <tr
           class="hover:bg-card/50"
           app-request-table-row
           [request]="request"
           [selectedRequests]="selectedRequests"
           (onDeleteSelected)="onDeleteSelected($event)"
           (onUpdateStatus)="handleStatusUpdate($event)"
+          (detailRequest)="detailRequest($event)"
           ></tr>
         } @empty {
         <tr>
@@ -108,5 +109,4 @@
     (pageChange)="onPageChange($event)"
     (sizeChange)="onSizeChange($event)">
   </app-request-table-footer>
-
 </div>

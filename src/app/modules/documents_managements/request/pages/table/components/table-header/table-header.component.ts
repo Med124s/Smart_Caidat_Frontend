@@ -31,6 +31,7 @@ export class TableRequestHeaderComponent implements OnInit {
     }
     this.canChangeStatus = this.currentUser?.authorities?.includes('ROLE_ADMIN') ?? false;
   }
+
   toggleAllSelection(event: any) {
     const checked = event.target.checked;
 

@@ -4,9 +4,10 @@ import { Injectable, signal } from '@angular/core';
   providedIn: 'root',
 })
 export class TableFilterService {
-  searchField = signal<string>('');
- statusField = signal<string>('');
-  orderField = signal<string>('');
+  searchField = signal<string>('');   // فلترة بالكلمة
+  statusField = signal<string>('');   // فلترة بالstatus
+  typeField = signal<string>('');     // فلترة بالtype ✅
+  orderField = signal<string>('');    // للترتيب
 
   constructor() {}
 }

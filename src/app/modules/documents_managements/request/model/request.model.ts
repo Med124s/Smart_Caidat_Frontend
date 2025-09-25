@@ -8,8 +8,7 @@ export enum RequestType {
   CERTIFICAT_VIE = 'CERTIFICAT_VIE',
   CERTIFICAT_MARITAL = 'CERTIFICAT_MARITAL',
   CERTIFICAT_RESIDENCE = 'CERTIFICAT_RESIDENCE',
-  CIN = 'CIN',
-  PASSPORT = 'PASSPORT',
+  CERTIFICAT_DECES = 'CERTIFICAT DECES',
   AUTRE = 'AUTRE'
 }
 
@@ -21,10 +20,12 @@ export interface RequestDocument {
   citizenPublicId?: string;
   creatorPublicId?: string;
   validatorPublicId?: string;
-  citizen?:{firstname:string,lastName:string, publicId:string}
+  citizenCin?:string;
+  creatorFullName?:string;
   creationDate?:Date | string;
-  documentUrl:string;
+  otherType?:string;
+  documentUrl:string | null;
   creator?: {lastName:string, firstname:string, publicId:string};
-  status:RequestStatus;
+  status?:RequestStatus | any;
   validationDate?: Date | string;
 }

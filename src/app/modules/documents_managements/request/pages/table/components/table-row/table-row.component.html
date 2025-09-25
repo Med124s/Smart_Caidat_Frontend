@@ -1,21 +1,21 @@
 <ng-container>
   <!-- ✅ Checkbox sélection -->
-  <td class="text-center">
+  <td class="text-center" (click)="toggleSelection($event)">
     <input
+      class="checkbox checkbox-sm"
+      data-datatable-row-check="true"
       type="checkbox"
-      [checked]="isSelected$ | async"
-      (change)="toggleSelection($event)"
-      class="checkbox checkbox-sm" />
+      [checked]="selectionService.isSelected(request.publicId!)" />
   </td>
 
   <!-- 🏷️ Titre -->
   <td>{{ request.type | prettyType }}</td>
-  <td>{{ request.citizenPublicId }}</td>
+  <td>{{ request.citizenCin }}</td>
   <td>{{ request.motif }}</td>
   <td>
     {{ request.description.length > 50 ? (request.description | slice: 0:50) + '...' : request.description }}
   </td>
-  <td>{{ request.creatorPublicId }}</td>
+  <td>{{ request.creatorFullName }}</td>
   <!-- <td>{{ request.status. }}</td> -->
   <td>
     <span
@@ -40,7 +40,20 @@
   <!-- ✅ Action -->
   <td *ngIf="canChangeStatus" class="relative">
     <!-- Icône pour ouvrir/fermer le menu -->
-    <button (click)="toggleMenu(request.publicId)" class="rounded p-1 hover:bg-gray-200">⚙️</button>
+    <button (click)="toggleMenu(request.publicId, $event)" class="cursor-pointer rounded p-1 hover:bg-gray-200">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="currentColor"
+        class="size-6 text-indigo-700 ">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+      </svg>
+    </button>
 
     <!-- Menu dropdown -->
     <div
@@ -48,19 +61,19 @@
       class="absolute right-0 z-10 mt-2 w-36 rounded-md border bg-white shadow-lg">
       <button
         class="block w-full px-3 py-1 text-left text-sm hover:bg-green-100"
-        (click)="updateStatus(request, RequestStatus.APPROVED)">
+        (click)="updateStatus(request, RequestStatus.APPROVED, $event)">
         ✅ Approuver
       </button>
 
       <button
         class="block w-full px-3 py-1 text-left text-sm hover:bg-red-100"
-        (click)="updateStatus(request, RequestStatus.REJECTED)">
+        (click)="updateStatus(request, RequestStatus.REJECTED, $event)">
         ❌ Rejeter
       </button>
 
       <button
         class="block w-full px-3 py-1 text-left text-sm hover:bg-yellow-100"
-        (click)="updateStatus(request, RequestStatus.PENDING)">
+        (click)="updateStatus(request, RequestStatus.PENDING, $event)">
         ⏳ En attente
       </button>
     </div>
@@ -78,15 +91,13 @@
   <!-- Colonne Documents -->
   <td class="relative text-center">
     <!-- Badge avec nombre de documents -->
-    <!-- <span
-      class="absolute top-3 right-10 inline-flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-xs text-white">
-      {{ 0 }}
-    </span> -->
+
     <!-- Icône œil -->
-    <button type="button" 
-    class="group relative rounded p-1 hover:bg-gray-200"
-     (click)="openDocuments(request, $event)"
-     [disabled]="request.status?.value !== 'APPROVED'">
+    <button
+      type="button"
+      class="group relative rounded p-1 hover:bg-gray-200"
+      (click)="openDocuments(request, $event)"
+      [disabled]="!request.documentUrl || request.status?.value !== 'APPROVED'">
       <!-- <svg
         xmlns="http://www.w3.org/2000/svg"
         class="h-5 w-5 text-blue-600"
@@ -100,7 +111,10 @@
           stroke-width="2"
           d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
       </svg> -->
-
+      <span
+        class="absolute -top-3 left-3 inline-flex h-4 w-4 items-center justify-center rounded-full bg-purple-500 text-xs text-white">
+        {{ counterDoc }}
+      </span>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
@@ -120,12 +134,11 @@
         voir le document
       </span>
     </button>
-
+    @if (canChangeStatus) {
     <button
       type="button"
-      class="group relative rounded  hover:bg-gray-200"
-      (click)="downloadDocument(request, $event)"
-      [disabled]="request.status?.value !== 'APPROVED'">
+      class="group relative rounded hover:bg-gray-200"
+      (click)="generateCertificate(request, $event)">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
@@ -148,8 +161,7 @@
     <button
       type="button"
       class="group relative rounded p-1 hover:bg-gray-200"
-      (click)="uploadDocuments(request, $event)"
-      [disabled]="request.status?.value !== 'APPROVED'">
+      (click)="uploadDocuments(request, $event)">
       <!-- Icon -->
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -169,6 +181,7 @@
         télécharger
       </span>
     </button>
+    }
   </td>
 </ng-container>
 

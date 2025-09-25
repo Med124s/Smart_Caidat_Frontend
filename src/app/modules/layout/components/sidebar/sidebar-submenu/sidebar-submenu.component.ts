@@ -12,15 +12,17 @@ import { NotificationService } from 'src/app/modules/documents_managements/reque
   selector: 'app-sidebar-submenu',
   templateUrl: './sidebar-submenu.component.html',
   styleUrls: ['./sidebar-submenu.component.css'],
-  imports: [NgClass, NgFor, NgTemplateOutlet, RouterLinkActive, RouterLink, AngularSvgIconModule, NgIf],
+  imports: [NgClass, NgFor, NgTemplateOutlet, RouterLinkActive, RouterLink, AngularSvgIconModule],
 })
 export class SidebarSubmenuComponent implements OnInit {
   @Input() public submenu = <SubMenuItem>{};
 
   pendingCount: number = 0;
+  pendingComplaintCount: number = 0;
   currentUser: ConnectedUser | null = null;
   oauth2Auth = inject(Oauth2AuthService);
   notificationService = inject(NotificationService);
+  isAdmin = false;
   constructor(public menuService: MenuService) {}
 
   // ngOnInit() {
@@ -33,10 +35,21 @@ export class SidebarSubmenuComponent implements OnInit {
   //   }
   // }
 
-  
   ngOnInit() {
-    this.notificationService.pendingCount$.subscribe(count => this.pendingCount = count);
+    const state = this.oauth2Auth.fetchUser();
+    if (state.status === 'OK' && state.value) {
+      this.currentUser = state.value;
+      if (this.currentUser.authorities?.includes('ROLE_ADMIN')) {
+        this.isAdmin = true;
+      }
+    }
+    this.notificationService.pendingCount$.subscribe((count) => (this.pendingCount = count));
     this.notificationService.loadPendingCount();
+
+    this.notificationService.pendingComplaintCount$.subscribe((count) => (this.pendingComplaintCount = count));
+    this.notificationService.loadPendingCompalintCount();
+
+    
   }
 
   public toggleMenu(menu: any) {

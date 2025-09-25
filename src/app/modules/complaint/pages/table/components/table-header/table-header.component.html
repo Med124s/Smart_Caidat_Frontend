@@ -1,0 +1,26 @@
+<ng-container>
+  <th class="w-[50px] text-center">
+    <input
+      [checked]="isAllSelected()"
+      (change)="toggleAllSelection($event)"
+      class="checkbox checkbox-sm"
+      data-datatable-check="true"
+      type="checkbox" />
+  </th>
+
+  <!-- <th class="min-w-[180px]">Titre</th> -->
+  <th class="min-w-[180px]">Type</th>
+  <th class="min-w-[200px]">Description</th>
+  <th class="min-w-[180px]">Priorité</th>
+  <!-- <th class="min-w-[180px]">Crier par</th>
+  <th class="min-w-[180px]">Validé par</th> -->
+  <th class="min-w-[180px]">Citoyen</th>
+  <th class="min-w-[150px]">Status</th>
+  <th class="min-w-[150px]">Remarque</th>
+  <th class="min-w-[200px]">Date creation</th>
+  <th class="min-w-[200px]">Date validation</th>
+
+  @if (canChangeStatus) {
+  <th class="min-w-[150px]">Action</th>
+  }
+</ng-container>

@@ -1,0 +1,192 @@
+@if(mode !== 'about'){
+<div class="bg-foreground fixed inset-0 z-50 flex items-center justify-center opacity-95">
+  <div class="mx-auto h-full max-h-[95vh] w-full max-w-3xl overflow-y-auto rounded-lg bg-white p-8 shadow-lg">
+    <h3 class="mb-4 text-xl font-semibold text-gray-700">
+      📑 {{ mode === 'create' ? 'Nouvelle Réclamation' : 'Modifier Réclamation' }}
+    </h3>
+
+    <form [formGroup]="complaintForm" (ngSubmit)="onSubmit()" class="space-y-6">
+      <!-- Title -->
+      <div>
+        <label for="title" class="text-muted-foreground mb-1 block text-xs">titre</label>
+        <input id="title" type="text" formControlName="title" class="input" />
+      </div>
+      <!-- Type -->
+      <div>
+        <label for="type" class="text-muted-foreground mb-1 block text-xs">Type de réclamation *</label>
+        <select id="type" formControlName="type" class="input">
+          <option value="">-- Sélectionner --</option>
+          <option [value]="ComplaintType.ADMINISTRATIVE">{{ ComplaintTypeLabel.ADMINISTRATIVE }}</option>
+          <option [value]="ComplaintType.INFRASTRUCTURE">{{ ComplaintTypeLabel.INFRASTRUCTURE }}</option>
+          <option [value]="ComplaintType.SANITATION">{{ ComplaintTypeLabel.SANITATION }}</option>
+          <option [value]="ComplaintType.SECURITY">{{ ComplaintTypeLabel.SECURITY }}</option>
+          <option [value]="ComplaintType.OTHER">{{ ComplaintTypeLabel.OTHER }}</option>
+        </select>
+        <div
+          *ngIf="complaintForm.get('type')?.touched && complaintForm.get('type')?.invalid"
+          class="text-xs text-red-500">
+          Le type est obligatoire.
+        </div>
+      </div>
+
+      <!-- Champ "Autre" -->
+      <div *ngIf="complaintForm.get('type')?.value === 'OTHER'" class="mt-2">
+        <label for="otherType" class="text-muted-foreground mb-1 block text-xs">Préciser le type *</label>
+        <input
+          id="otherType"
+          type="text"
+          formControlName="otherType"
+          class="input"
+          placeholder="Saisir le type de réclamation" />
+      </div>
+
+      <!-- Description -->
+      <div>
+        <label for="description" class="text-muted-foreground mb-1 block text-xs">Description</label>
+        <textarea id="description" formControlName="description" rows="3" class="input"></textarea>
+      </div>
+
+      <!-- Citoyen -->
+      <div>
+        <label for="citizenPublicId" class="text-muted-foreground mb-1 block text-xs">Citoyen *</label>
+        <select id="citizenPublicId" formControlName="citizenPublicId" class="input w-full">
+          <option value="">-- Sélectionner --</option>
+          <option *ngFor="let c of citizens$ | async" [value]="c.publicId">{{ c.firstName }} {{ c.lastName }}</option>
+        </select>
+        <div
+          *ngIf="complaintForm.get('citizenPublicId')?.touched && complaintForm.get('citizenPublicId')?.invalid"
+          class="text-xs text-red-500">
+          Le citoyen est obligatoire.
+        </div>
+      </div>
+
+      <!-- priority -->
+      <div>
+        <label for="priority" class="text-muted-foreground mb-1 block text-xs">Priorité*</label>
+        <select id="priority" formControlName="priority" class="input">
+          <option value="">-- Sélectionner --</option>
+          <option [value]="ComplaintPriority.HIGH">{{ ComplaintPriorityLabel.HIGH }}</option>
+          <option [value]="ComplaintPriority.LOW">{{ ComplaintPriorityLabel.LOW }}</option>
+          <option [value]="ComplaintPriority.MEDIUM">{{ ComplaintPriorityLabel.MEDIUM }}</option>
+          <option [value]="ComplaintPriority.URGENT">{{ ComplaintPriorityLabel.URGENT }}</option>
+        </select>
+        <div
+          *ngIf="complaintForm.get('priority')?.touched && complaintForm.get('priority')?.invalid"
+          class="text-xs text-red-500">
+          priority est obligatoire.
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="mt-4 flex justify-end gap-2 border-t pt-4">
+        <button
+          type="submit"
+          class="hover:bg-primary-600 text-primary-foreground rounded-md bg-green-400 px-4 py-2.5 text-xs font-semibold">
+          {{ mode === 'create' ? 'Créer' : 'Mettre à jour' }}
+        </button>
+        <button
+          type="button"
+          (click)="cancel()"
+          class="hover:bg-primary-600 text-primary-foreground rounded-md bg-red-500 px-4 py-2.5 text-xs font-semibold">
+          Annuler
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+}
+<!-- Modal Détail Réclamation -->
+<!-- Modal Détail Réclamation -->
+<div
+  *ngIf="mode === 'about'"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+>
+  <div
+    class="bg-white rounded-2xl shadow-xl w-full max-w-3xl p-8 relative"
+  >
+    <!-- Header -->
+    <div class="flex justify-between items-center border-b pb-4 mb-6">
+      <h2 class="text-xl font-bold text-gray-900">📄 Détails de la Réclamation</h2>
+      <button
+        class="text-gray-400 hover:text-gray-600 cursor-pointer text-xl"
+        (click)="close.emit()"
+      >
+        ✕
+      </button>
+    </div>
+
+    <!-- Contenu -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-sm text-gray-700">
+      <div>
+        <p class="text-gray-500 font-medium">Titre</p>
+        <p class="text-gray-900 font-semibold">{{ complaint?.title }}</p>
+      </div>
+
+      <div>
+        <p class="text-gray-500 font-medium">Type</p>
+        <p class="text-gray-900">{{ complaint?.type | prettyComplaintType }}</p>
+      </div>
+
+      <div>
+        <p class="text-gray-500 font-medium">Priorité</p>
+        <p class="text-gray-900">{{ complaint?.priority | prettyComplaintPriority }}</p>
+      </div>
+
+      <div>
+        <p class="text-gray-500 font-medium">Statut</p>
+        <p class="text-gray-900">{{ complaint?.status | prettyComplaintStatus }}</p>
+      </div>
+
+      <div>
+        <p class="text-gray-500 font-medium">Citoyen</p>
+        <p class="text-gray-900">{{ complaint?.citizen?.firstName }} {{ complaint?.citizen?.lastName }}</p>
+      </div>
+
+      <div>
+        <p class="text-gray-500 font-medium">Raison</p>
+        <p class="text-gray-900">{{ complaint?.reason || '-' }}</p>
+      </div>
+
+      <div>
+        <p class="text-gray-500 font-medium">Créée le</p>
+        <p class="text-gray-900">{{ complaint?.creationDate | date:'yyyy-MM-dd HH:mm:ss' }}</p>
+      </div>
+
+      <div>
+        <p class="text-gray-500 font-medium">Validée le</p>
+        <p class="text-gray-900">{{ complaint?.validationDate | date:'yyyy-MM-dd HH:mm:ss' }}</p>
+      </div>
+
+      <div>
+        <p class="text-gray-500 font-medium">Créée par</p>
+        <p class="text-gray-900">{{ complaint?.createdBy?.firstName }} {{ complaint?.createdBy?.lastName }}</p>
+      </div>
+
+      <div *ngIf="complaint?.assignedTo">
+        <p class="text-gray-500 font-medium">Assignée à</p>
+        <p class="text-gray-900">{{ complaint?.assignedTo?.firstName }} {{ complaint?.assignedTo?.lastName }}</p>
+      </div>
+    </div>
+
+    <!-- Description en bloc séparé -->
+    <div class="mt-6">
+      <p class="text-gray-500 font-medium mb-1">Description</p>
+      <div
+        class="bg-gray-50 border rounded-lg p-4 text-gray-800 whitespace-pre-wrap text-sm"
+      >
+        {{ complaint?.description }}
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="mt-8 flex justify-end">
+      <button
+        class="bg-red-500 text-white px-5 py-2 rounded-lg hover:bg-red-600 transition cursor-pointer"
+        (click)="close.emit()"
+      >
+        Fermer
+      </button>
+    </div>
+  </div>
+</div>
+
