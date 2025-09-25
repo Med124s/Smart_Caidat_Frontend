@@ -1,0 +1,334 @@
+
+<div class="mb-4 flex justify-between">
+  <div class="inline-block">
+    <h3 class="text-foreground font-semibold">Tâches</h3>
+    <div class="text-muted-foreground space-x-1 text-xs font-medium">
+      <a href="" class="hover:text-primary">Tous les tâches:</a>
+      <span class="text-foreground">{{_tasksResponse.totalElements}}  </span>
+    </div>
+  </div>
+  <div class="inline-block space-x-4">
+    <button class="bg-primary text-primary-foreground flex-none rounded-md px-4 py-2.5 text-xs font-semibold" (click)="openModal()">
+      Nouvelle tâche
+    </button>
+  </div>
+</div>
+
+<div class="border-muted/20 bg-background flex min-w-full flex-col rounded-xl border p-2">
+
+    <div class="flex flex-wrap items-center justify-between gap-2 py-3 px-5">
+        <h3 class="text-muted-foreground text-sm font-medium">
+            Affichage de {{_size}}  sur {{_tasksResponse.totalElements}} tâches
+        </h3>
+
+
+
+  <div class="flex flex-wrap gap-2">
+    <div class="flex">
+      <label class="text-muted-foreground relative">
+        <div class="absolute left-2.5 top-2.5">
+          <svg-icon src="../../../assets/icons/heroicons/outline/magnifying-glass.svg" [svgClass]="'h-4 w-4'"> </svg-icon>
+        </div>
+                <input [(ngModel)]="_keyword" (input)="onSearchTasks()" name="search" class="py-2 pl-8 pr-2" placeholder="Recherche" type="text" value="" />
+
+      </label>
+    </div>
+    <button (click)="deleteSelectedTasks()" class="bg-primary text-primary-foreground flex-none rounded-md px-4 py-2.5 text-xs font-semibold cursor-pointer">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+        class="size-4">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+      </svg>
+    </button>
+
+  </div>
+</div>
+
+
+  <div class="scrollbar-thumb-rounded scrollbar-track-rounded scrollbar-thin scrollbar-track-transparent scrollbar-thumb-muted grow overflow-x-auto px-5">
+    <table
+      class="text-muted-foreground table w-full table-auto border-collapse border-0 text-left align-middle leading-5">
+      <thead class="border-muted/20 text-muted-foreground border text-xs">
+            <th class="w-[50px]">
+                <input
+                  type="checkbox"
+                  class="checkbox checkbox-sm"
+                  [checked]="_selectAll"
+                  (change)="onToggleSelectAll($event)"
+                />            </th>
+            <th class="min-w-[180px]">Tâche</th>
+            <th class="min-w-[180px]">Affectation</th>
+            <th class="min-w-[180px]">Status</th>
+            <th class="min-w-[180px]">Date début</th>
+            <th class="min-w-[180px]">Date fin</th>
+            <th class="min-w-[180px] text-end">Actions</th>
+      </thead>
+      <tbody>
+
+
+         @for (task of _tasksResponse.content; track task) {
+        <tr class="hover:bg-card/50">
+            <td class="text-center">
+
+              <input
+                type="checkbox"
+                class="checkbox checkbox-sm"
+                [value]="task.id"
+                [checked]="_selectedIds.includes(task.id)"
+                (change)="onSelectRow($event, task.id)"
+              />
+
+            </td>
+            <td>{{ task.title }}</td>
+            <td>User 3</td>
+            <td>
+                  <div (click)="changeStatus(task)" class="badges" *ngIf="task.status === 'À faire'"><span class="badge badge-info">À faire</span></div> 
+                  <div (click)="changeStatus(task)" class="badges" *ngIf="task.status === 'En cours'"><span class="badge badge-primary ">En cours</span></div> 
+                  <div (click)="changeStatus(task)" class="badges" *ngIf="task.status === 'Sans suite'"><span class="badge badge-danger">Sans suite</span></div> 
+                  <div (click)="changeStatus(task)" class="badges" *ngIf="task.status === 'Terminée'"><span class="badge badge-success">Terminée</span></div> 
+            </td>
+            <td>{{ task.dateDebut }}</td>
+            <td>{{ task.dateFin }}</td>
+            <td class="text-end">
+              <button (click)="openModalView(task)" class="cursor-pointer rounded hover:bg-gray-200 ">
+                <i class="size-6 text-yellow-500 fa-regular fa-eye"></i>
+              </button>
+              <button (click)="openModalUpdate(task)" class="cursor-pointer rounded hover:bg-gray-200 mx-4">
+                <i class="size-6 text-blue-500 fa-solid fa-pencil"></i>
+              </button>
+            </td>
+        </tr>
+        }
+        <tr class="hover:bg-card/50" *ngIf="_tasksResponse.content?.length === 0">
+          <td class="py-4 text-center text-sm" colspan="7">Aucune tache trouvée.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+    <pagination 
+        [currentPage]="_page!" 
+        [totalPages]="_tasksResponse.totalPages!" 
+        [totalItems]="_tasksResponse.totalElements!"
+        [size]='_size!'
+        (sizeChange)="onSizeChange($event)" 
+        (pageChange)="onPageChange($event)"
+        />
+
+<div *ngIf="visible || visibleUpdate" class="fixed inset-0 flex items-center justify-center bg-foreground z-50 opacity-95">
+  <div class="bg-card text-white p-6 rounded-lg w-full max-w-2xl">
+    <h2 class="text-xl text-foreground font-semibold mb-4">
+      {{ visibleUpdate ? 'A propos de la tâche' : 'Ajouter une nouvelle tâche' }}
+    </h2>
+        <form [formGroup]="taskForm" (ngSubmit)="onSubmit()" class="space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+            <label for="title" class="block text-xs text-muted-foreground mb-1">Titre</label>
+            <input id="title" placeholder="Titre" type="text" formControlName="title" class="input" />
+            <div *ngIf="taskForm.get('title')?.touched && taskForm.get('title')?.invalid" class="text-red-500 text-xs mt-1">
+                *Le titre est requis.
+            </div>
+            </div>
+        <div>
+            <label for="status" class="block text-xs text-muted-foreground mb-1">Status</label>
+            <select id="status" formControlName="status" class="input w-full">
+            <option *ngFor="let _stat of _statusTask" value="{{_stat.title}}">{{_stat.title}}</option>
+            </select>
+            <div *ngIf="taskForm.get('status')?.touched && taskForm.get('status')?.invalid" class="text-red-500 text-xs mt-1">
+            *Type requis.
+            </div>
+        </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="dateDebut" class="block text-xs text-muted-foreground mb-1">Date début</label>
+              <input id="dateDebut" placeholder="date de début" type="date" formControlName="dateDebut" class="input" />
+              <div *ngIf="taskForm.get('dateDebut')?.touched && taskForm.get('dateDebut')?.invalid" class="text-red-500 text-xs mt-1">
+                  *La Date début est requise.
+              </div>
+            </div>
+            <div>
+              <label for="dateFin" class="block text-xs text-muted-foreground mb-1">Date de fin</label>
+              <input id="dateFin" placeholder="date fin" type="date" formControlName="dateFin" class="input" />
+              <div *ngIf="taskForm.get('dateFin')?.touched && taskForm.get('dateFin')?.invalid" class="text-red-500 text-xs mt-1">
+                  *La date fin est requise.
+              </div>
+            </div>
+      </div>
+
+        <div>
+            <label for="idAffected" class="block text-xs text-muted-foreground mb-1">Affecté à</label>
+            <select id="idAffected" formControlName="idAffected" class="input w-full">
+            <option *ngFor="let _affect of _statusAffected" value="{{_affect.id}}">{{_affect.name}}</option>
+            </select>
+            <div *ngIf="taskForm.get('idAffected')?.touched && taskForm.get('idAffected')?.invalid" class="text-red-500 text-xs mt-1">
+            * Affectation est requis.
+            </div>
+        </div>
+
+            <div>
+              <label for="descriptionCreation" class="block text-xs text-muted-foreground mb-1">Description</label>
+              <textarea id="descriptionCreation" rows="3" type="text" placeholder="descriptionCreation" formControlName="descriptionCreation" class="textarea" ></textarea>
+              <div *ngIf="taskForm.get('descriptionCreation')?.touched && taskForm.get('descriptionCreation')?.invalid" class="text-red-500 text-xs mt-1">
+              *Description est requise.
+              </div>
+            </div>
+
+        <div class="flex justify-end gap-2 mt-4">
+            <button type="submit" class="hover:bg-primary-600 bg-green-400 text-primary-foreground rounded-md px-4 py-2.5 text-xs font-semibold">
+            {{ visibleUpdate ? 'Mettre à jour' : 'Enregistrer' }}
+            </button>
+            <button type="button" (click)="cancel()" class="hover:bg-primary-600 bg-red-500 text-primary-foreground rounded-md px-4 py-2.5 text-xs font-semibold">
+            Annuler
+            </button>
+        </div>
+        </form>
+  </div>
+</div>
+
+<div *ngIf="visibleView" class="fixed inset-0 flex items-center justify-center bg-foreground z-50 opacity-95">
+  <div class="bg-card text-white p-6 rounded-lg w-full max-w-2xl">
+    <h2 class="text-xl text-foreground font-semibold mb-4">
+      A propos : {{_currentTask?.title}}
+    </h2>
+        <form [formGroup]="taskForm" (ngSubmit)="onSubmit()" class="space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+            <label for="title" class="block text-xs text-muted-foreground mb-1">Titre</label>
+            <div class="text-sm mt-1 text-black">
+                {{_currentTask?.title}}
+            </div>
+            </div>
+        <div>
+            <label for="status" class="block text-xs text-muted-foreground mb-1">Status</label>
+            <div class="text-sm mt-1 text-black">
+                {{_currentTask?.status}}
+            </div>
+        </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="dateDebut" class="block text-xs text-muted-foreground mb-1">Date début</label>
+              <div class="text-sm mt-1 text-black">
+                  {{_currentTask?.dateDebut}}
+              </div>
+            </div>
+            <div>
+              <label for="dateFin" class="block text-xs text-muted-foreground mb-1">Date de fin</label>
+              <div class="text-sm mt-1 text-black">
+                  {{_currentTask?.dateFin}}
+              </div>
+            </div>
+      </div>
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="dateDebut" class="block text-xs text-muted-foreground mb-1">Affecté à</label>
+              <div class="text-sm mt-1 text-black">
+                  User 4
+              </div>
+            </div>
+
+              <div *ngIf="_currentTask?.rapport">
+                <label for="dateFin" class="block text-xs text-muted-foreground mb-1">Rapport</label>
+                <div class="text-sm mt-1 text-blue-500">
+                  <span (click)="downloadFile(_currentTask!.rapport!)">{{ _currentTask!.rapport }}</span>
+                </div>
+              </div>
+
+      </div>
+
+            <div>
+              <label for="description" class="block text-xs text-muted-foreground mb-1">Description 1</label>
+              <div class="text-sm mt-1 text-black">
+                  {{_currentTask?.descriptionCreation}}
+              </div>
+            </div>
+            <div>
+              <label for="description" class="block text-xs text-muted-foreground mb-1">Description 2</label>
+              <div class="text-sm mt-1 text-black">
+                  {{_currentTask?.descriptionUpdate}}
+              </div>
+            </div>
+                <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="dateReception" class="block text-xs text-muted-foreground mb-1">Date Création</label>
+              <div class="text-black text-sm mt-1">
+                  {{_currentTask?.createdDate | date: 'yyyy-MM-dd à HH:mm:ss'}}
+              </div>
+            </div>
+          <div>
+            <label for="description" class="block text-xs text-muted-foreground mb-1">Crée par</label>
+              <div class="text-black text-sm mt-1">
+                  Mohamed BEN-YGHIL
+              </div>
+            </div>
+        </div>
+                <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="dateReception" class="block text-xs text-muted-foreground mb-1">Modifié le</label>
+              <div class="text-black text-sm mt-1">
+                  {{_currentTask?.lastModifiedDate | date: 'yyyy-MM-dd à HH:mm:ss'}}
+              </div>
+            </div>
+            <div>
+            <label for="description" class="block text-xs text-muted-foreground mb-1">Modifié par</label>
+              <div class="text-black text-sm mt-1">
+                  Lakbir ABDERRAHIM
+              </div>
+            </div>
+        </div>
+        <div class="flex justify-end gap-2 mt-4">
+            <button type="button" (click)="cancel()" class="hover:bg-primary-600 bg-red-500 text-primary-foreground rounded-md px-4 py-2.5 text-xs font-semibold">
+              Fermer
+            </button>
+        </div>
+        </form>
+  </div>
+</div>
+
+
+<div *ngIf="visibleChangeStatusModal" class="fixed inset-0 flex items-center justify-center bg-foreground z-50 opacity-95">
+  <div class="bg-card text-white p-6 rounded-lg w-full max-w-2xl">
+    <h2 class="text-xl text-foreground font-semibold mb-4">
+      Changement status de la tache : {{_currentTask?.title}}
+    </h2>
+        <form [formGroup]="taskStatusForm" (ngSubmit)="onSubmitStatut()" class="space-y-4">
+            <div>
+                <label for="status" class="block text-xs text-muted-foreground mb-1">Status</label>
+                <select id="status" formControlName="status" class="input w-full">
+                <option *ngFor="let _stat of _statusTask" value="{{_stat.title}}">{{_stat.title}}</option>
+                </select>
+                <div *ngIf="taskStatusForm.get('status')?.touched && taskStatusForm.get('status')?.invalid" class="text-red-500 text-xs mt-1">
+                *Type requis.
+                </div>
+            </div>  
+            <div>
+              <label for="descriptionUpdate" class="block text-xs text-muted-foreground mb-1">Description</label>
+              <textarea id="descriptionUpdate" rows="3" type="text" placeholder="Description" formControlName="descriptionUpdate" class="textarea" ></textarea>
+              <div *ngIf="taskStatusForm.get('descriptionUpdate')?.touched && taskStatusForm.get('descriptionUpdate')?.invalid" class="text-red-500 text-xs mt-1">
+              *Description est requise.
+              </div>
+            </div>   
+
+            <div *ngIf="taskStatusForm.get('status')?.value === 'Terminée'">
+              <label for="fileDoc" class="block text-xs text-muted-foreground mb-1">Rapport</label>
+              <input id="fileDoc" type="file" (change)="onFileSelected($event)"
+                class="p-2 block w-full text-sm text-background border border-muted rounded-lg cursor-pointer bg-foreground focus:outline-none" />
+              <div *ngIf="fileError" class="text-red-500 text-xs mt-1">
+                *Le document est requis.
+              </div>
+            </div>
+  
+
+        <div class="flex justify-end gap-2 mt-4">
+            <button type="submit" class="hover:bg-primary-600 bg-green-400 text-primary-foreground rounded-md px-4 py-2.5 text-xs font-semibold">
+              Mettre à jour
+            </button>
+            <button type="button" (click)="cancel()" class="hover:bg-primary-600 bg-red-500 text-primary-foreground rounded-md px-4 py-2.5 text-xs font-semibold">
+              Annuler
+            </button>
+        </div>
+        </form>
+  </div>
+</div>
+</div>

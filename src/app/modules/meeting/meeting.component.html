@@ -1,0 +1,197 @@
+
+<div class="mb-4 flex justify-between">
+  <div class="inline-block">
+    <h3 class="text-foreground font-semibold">Réunions</h3>
+    <div class="text-muted-foreground space-x-1 text-xs font-medium">
+      <a href="" class="hover:text-primary">Tous les réunions:</a>
+      <span class="text-foreground">{{_meetingResponse.totalElements}} </span>
+    </div>
+  </div>
+  <div class="inline-block space-x-4">
+    <button class="bg-primary text-primary-foreground flex-none rounded-md px-4 py-2.5 text-xs font-semibold" (click)="openModal()">
+      Nouvelle Réunion
+    </button>
+  </div>
+</div>
+<div class="border-muted/20 bg-background flex min-w-full flex-col rounded-xl border p-2">
+    <div class="flex flex-wrap items-center justify-between gap-2 py-3 px-5">
+        <h3 class="text-muted-foreground text-sm font-medium">
+            Affichage de {{_size}}  sur {{_meetingResponse.totalElements}} meetings
+        </h3>
+  <div class="flex flex-wrap gap-2">
+    <div class="flex">
+      <label class="text-muted-foreground relative mx-2">
+        <div class="absolute left-2.5 top-2.5">
+          <svg-icon src="../../../assets/icons/heroicons/outline/magnifying-glass.svg" [svgClass]="'h-4 w-4'"> </svg-icon>
+        </div>
+        <input [(ngModel)]="_keyword" (input)="onSearchMeeting()" name="search" class="py-2 pl-8 pr-2" placeholder="Recherche" type="text" value=""/>
+      </label>
+      <label class="text-muted-foreground relative mx-2">
+        <div class="absolute left-2.5 top-2.5">
+          <svg-icon src="../../../assets/icons/heroicons/outline/calendar-regular-full.svg" [svgClass]="'h-4 w-4'"> </svg-icon>
+        </div>
+        <input [(ngModel)]="_keywordDateMeeting" (input)="onSearchByDate()" [ngModelOptions]="{standalone: true}" id="searchByDate" name="searchByDate" class="py-2 pl-8 pr-2" placeholder="Recherche" type="date" value=""/>
+      </label>
+    </div>
+
+  </div>
+</div>
+
+  <div class="space-y-6 p-6">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      @for (meeting of _meetingResponse.content; track meeting) {
+      <app-card-meeting [currentMeeting]="meeting" (action)="toUpdateMeeting($event)"  />
+      }
+
+        <div class="hover:bg-card/50" *ngIf="_meetingResponse.content?.length === 0">
+          <span class="py-4 text-center text-sm">Aucune réunionstrouvée.</span>
+        </div>
+    </div>
+  </div>
+
+  <pagination 
+      [currentPage]="_page!" 
+      [totalPages]="_meetingResponse.totalPages!" 
+      [totalItems]="_meetingResponse.totalElements!"
+      [size]='_size!'
+      (sizeChange)="onSizeChange($event)" 
+      (pageChange)="onPageChange($event)"
+      />
+
+
+<div *ngIf="visible || visibleUpdate" class="fixed inset-0 flex items-center justify-center bg-foreground z-50 opacity-95">
+  <div class="bg-card text-white p-6 rounded-lg w-full max-w-5xl">
+    <h2 class="text-xl text-foreground font-semibold mb-4">
+      {{ visibleUpdate ? 'A propos du meeting' : 'Ajouter un nouveau meeting' }}
+    </h2>
+        <form [formGroup]="meetingForm" (ngSubmit)="onSubmit()" class="space-y-4">
+
+            <div>
+              <label for="subject" class="block text-xs text-muted-foreground mb-1">Titre</label>
+              <input id="subject" placeholder="Titre de la réunion" type="text" formControlName="subject" class="input" />
+              <div *ngIf="meetingForm.get('subject')?.touched && meetingForm.get('subject')?.invalid" class="text-red-500 text-xs mt-1">
+                  *Le titre est requis.
+              </div>
+            </div>
+            <div>
+              <label for="description" class="block text-xs text-muted-foreground mb-1">Description</label>
+              <textarea id="description" rows="3" type="text" placeholder="Description" formControlName="description" class="textarea" ></textarea>
+              <div *ngIf="meetingForm.get('description')?.touched && meetingForm.get('description')?.invalid" class="text-red-500 text-xs mt-1">
+              *Description est requise.
+              </div>
+            </div>
+
+
+        <div class="grid grid-cols-3 gap-4">
+            <div>
+                <label for="salleId" class="block text-xs text-muted-foreground mb-1">Salle</label>
+                <select id="salleId" formControlName="salleId" class="input w-full">
+                <option value="">Sélectionner une salle</option>
+                <option *ngFor="let salle of _salles" value="{{salle.id}}">{{salle.title}}</option>
+                </select>
+                <div *ngIf="meetingForm.get('salleId')?.touched && meetingForm.get('salleId')?.invalid" class="text-red-500 text-xs mt-1">
+                *salle de réunion est requise.
+                </div>
+            </div>
+            <div>
+              <label for="dateMeeting" class="block text-xs text-muted-foreground mb-1">Date de la réunion</label>
+              <input id="dateMeeting" placeholder="date de récéption" type="date" formControlName="dateMeeting" class="input" />
+              <div *ngIf="meetingForm.get('dateMeeting')?.touched && meetingForm.get('dateMeeting')?.invalid" class="text-red-500 text-xs mt-1">
+                  *La date de la réunion est requise.
+              </div>
+            </div>
+            <div>
+                <label for="timeMeeting" class="block text-xs text-muted-foreground mb-1">Heure</label>
+                <select id="timeMeeting" formControlName="timeMeeting" class="input w-full">
+                  <option value="">Sélectionner l'heure</option>
+                  <option value='08:00'>08:00</option>
+                  <option value='08:30'>08:30</option>
+                  <option value='09:00'>09:00</option>
+                  <option value='09:30'>09:30</option>
+                  <option value='10:00'>10:00</option>
+                  <option value='10:30'>10:30</option>
+                  <option value='11:00'>11:00</option>
+                  <option value='11:30'>11:30</option>
+                  <option value='12:00'>12:00</option>
+                </select>
+                <div *ngIf="meetingForm.get('timeMeeting')?.touched && meetingForm.get('timeMeeting')?.invalid" class="text-red-500 text-xs mt-1">
+                *heure de la réunion est requise.
+                </div>
+            </div>
+        </div>
+        <hr />
+
+  <p class="text-black">Participants</p>
+  <div *ngIf="_participants.length > 0" class="scrollbar-thumb-rounded scrollbar-track-rounded scrollbar-thin scrollbar-track-transparent scrollbar-thumb-muted grow overflow-x-auto px-4">
+	<table class="text-muted-foreground table w-full table-auto border-collapse border-0 text-left align-middle leading-5">
+      <thead class="border-muted/20 text-muted-foreground border text-xs">
+            <th class="min-w-[180px]">Prénom</th>
+            <th class="min-w-[180px]">Nom</th>
+            <th class="min-w-[180px]">E-mail</th>
+            <th class="min-w-[180px]">Organisme</th>
+			<th class="min-w-[180px]">Supprimer</th>
+      </thead>
+      <tbody>
+	    @for (part of _participants; track part) {
+			<tr class="hover:bg-card/50">
+                    <td>{{part.firstName}}</td>
+                    <td>{{part.lastName}}</td>
+                    <td>{{part.email}}</td>
+                    <td>{{part.organisme}}</td>
+                    <td>
+                        <button type="button" class="btn btn-rounded btn-outline-danger text-red-500" (click)="deleteParticipant(part)">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+			</tr>
+        }
+	  </tbody>
+	</table>
+</div>
+
+        <hr />
+        <form action="javascript:" class="row row-cols-md-auto g-3 align-items-center">
+          <div class="grid grid-cols-5 gap-4">
+            <div>
+              <label for="firstName" class="block text-xs text-muted-foreground mb-1">Prénom</label>            
+              <input id="firstName" name="firstName" placeholder="Prénom" type="text" [(ngModel)]="participant.firstName" class="input" />
+            </div>
+
+          <div class="form-group col-md-3">
+            <label for="lastName" class="block text-xs text-muted-foreground mb-1">Nom</label>
+            <input type="text" name="lastName" [(ngModel)]="participant.lastName" class="form-control" id="inputLastName" placeholder="Nom" />
+          </div>
+
+          <div class="form-group col-md-3">
+            <label for="email" class="block text-xs text-muted-foreground mb-1">E-mail</label>
+            <input type="email" name="email" [(ngModel)]="participant.email" class="form-control" id="inputEmail" placeholder="E-mail" />
+          </div>   
+
+          <div class="form-group col-md-3">
+                <label for="email" class="block text-xs text-muted-foreground mb-1">Organisme</label>
+                <select id="organisme"  name="organisme" [(ngModel)]="participant.organisme" class="input w-full">
+                  <option *ngFor="let org of _organisms" value="{{org}}">{{org}}</option>
+                </select>
+          </div>
+          
+          <div class="form-group col-md-3">
+            <button type="button" class="btn-sm bg-primary text-primary-foreground flex-none rounded-md px-4 py-2.5 text-xs font-semibold mt-4" (click)="addParticipant()">
+                <i class="fa-solid fa-check"></i>
+            </button>
+          </div> 
+          </div>
+        </form>
+
+
+        <div class="flex justify-end gap-2 mt-4">
+            <button type="submit" class="hover:bg-primary-600 bg-green-400 text-primary-foreground rounded-md px-4 py-2.5 text-xs font-semibold">
+            {{ visibleUpdate ? 'Mettre à jour' : 'Enregistrer' }}
+            </button>
+            <button type="button" (click)="cancel()" class="hover:bg-primary-600 bg-red-500 text-primary-foreground rounded-md px-4 py-2.5 text-xs font-semibold">
+            Annuler
+            </button>
+        </div>
+        </form>
+  </div>
+</div>
+</div>

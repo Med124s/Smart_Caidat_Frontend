@@ -38,8 +38,10 @@
                 [ngClass]="{ hidden: !menuService.showSideBar }"
                 routerLinkActive="text-primary"
                 class="truncate text-xs font-semibold tracking-wide focus:outline-hidden">
-                {{ item.label }}
+                {{ item.label }} 
+                    <span *ngIf="item.label == 'Tâches' && notifTask > 0" class="notification-badge">{{notifTask}}</span>
 
+               
                 @if(item.label === "Réclamations" && isAdmin){
                 <span
                   *ngIf="notificationService.pendingComplaintCount$ | async as pendingComplaintCount"
@@ -57,7 +59,7 @@
               <a
                 [ngClass]="{ hidden: !menuService.showSideBar }"
                 class="text-muted-foreground group-hover:text-primary truncate text-xs font-semibold tracking-wide focus:outline-hidden">
-                {{ item.label }}
+                {{ item.label }} 
                 <!-- Badge notification -->
                 @if(item.label === "Gestion des documents" && isAdmin){
 

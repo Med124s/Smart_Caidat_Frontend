@@ -12,28 +12,6 @@ export class Menu {
           route: '/dashboard',
           children: [{ label: 'Statistiques', route: '/dashboard/statistics' }],
         },
-        // {
-        //   icon: 'assets/icons/heroicons/outline/lock-closed.svg',
-        //   label: 'Auth',
-        //   route: '/auth',
-        //   children: [
-        //     { label: 'Sign up', route: '/auth/sign-up' },
-        //     { label: 'Sign in', route: '/auth/sign-in' },
-        //     { label: 'Forgot Password', route: '/auth/forgot-password' },
-        //     { label: 'New Password', route: '/auth/new-password' },
-        //     { label: 'Two Steps', route: '/auth/two-steps' },
-        //   ],
-        // },
-        // {
-        //   icon: 'assets/icons/heroicons/outline/exclamation-triangle.svg',
-        //   label: 'Errors',
-        //   route: '/errors',
-        //   children: [
-        //     { label: '404', route: '/errors/404' },
-        //     { label: '500', route: '/errors/500' },
-        //   ],
-        // },
-
         {
           icon: 'assets/icons/heroicons/outline/cube.svg',
           label: 'Gestion des documents',
@@ -108,31 +86,48 @@ export class Menu {
         },
       ],
     },
-    // {
-    //   group: 'Config',
-    //   separator: false,
-    //   items: [
-    //     {
-    //       icon: 'assets/icons/heroicons/outline/cog.svg',
-    //       label: 'Settings',
-    //       route: '/settings',
-    //     },
-    //     {
-    //       icon: 'assets/icons/heroicons/outline/bell.svg',
-    //       label: 'Notifications',
-    //       route: '/gift',
-    //     },
-    //     {
-    //       icon: 'assets/icons/heroicons/outline/folder.svg',
-    //       label: 'Folders',
-    //       route: '/folders',
-    //       children: [
-    //         { label: 'Current Files', route: '/folders/current-files' },
-    //         { label: 'Downloads', route: '/folders/download' },
-    //         { label: 'Trash', route: '/folders/trash' },
-    //       ],
-    //     },
-    //   ],
-    // },
+    {
+      group: "Gestion des correspondances",
+      separator: true,
+      items: [
+        {
+          icon: 'assets/icons/heroicons/outline/envelope-open-text-thin-full.svg',
+          label: 'Correspondances',
+          route: '/correspondances',
+        },
+        {
+          icon: 'assets/icons/heroicons/outline/square-envelope-thin-full.svg',
+          label: 'Type Correspondance',
+          route: '/type-correspondances',
+        }
+      ],
+    },
+     {
+      group: "Réunions",
+      separator: true,
+      items: [
+        {
+          icon: 'assets/icons/heroicons/outline/calendar-thin-full.svg',
+          label: 'Réunions',
+          route: '/meetings',
+        },
+        {
+          icon: 'assets/icons/heroicons/outline/people-roof-thin-full.svg',
+          label: 'Salles de réunions',
+          route: '/salles',
+        }
+      ],
+    }, 
+     {
+      group: "Gestion des tâches",
+      separator: true,
+      items: [
+        {
+          icon: 'assets/icons/heroicons/outline/list-check-thin-full.svg',
+          label: 'Tâches',
+          route: '/tasks',
+        },
+      ],
+    }
   ];
 }
